@@ -1,4 +1,4 @@
-# libballistics-swift
+# swift-ballistics
 
 A Swift port of the [libballistics](https://github.com/grimwm/libballistics) library, designed for accurate and efficient ballistics simulation. This library provides tools to simulate projectile trajectories, accounting for various physical forces and environmental factors.
 
