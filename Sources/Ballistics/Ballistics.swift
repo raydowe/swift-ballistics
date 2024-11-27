@@ -9,59 +9,30 @@ import Foundation
 
 public struct Ballistics {
 
-    var yardages: [Point]
+    var yardages: [Point] = []
 
-    init() {
-        yardages = []
-    }
-
-    func getRange(at yardage: Int) -> Double {
-        guard yardage < yardages.count else { return 0 }
-        return yardages[yardage].rangeYards
-    }
-
-    func getPath(at yardage: Int) -> Double {
-        guard yardage < yardages.count else { return 0 }
-        return yardages[yardage].pathInches
-    }
-
-    func getMOA(at yardage: Int) -> Double {
-        guard yardage < yardages.count else { return 0 }
-        return yardages[yardage].moaCorrection
-    }
-
-    func getTime(at yardage: Int) -> Double {
-        guard yardage < yardages.count else { return 0 }
-        return yardages[yardage].seconds
-    }
-
-    func getWindage(at yardage: Int) -> Double {
-        guard yardage < yardages.count else { return 0 }
-        return yardages[yardage].windageInches
-    }
-
-    func getWindageMOA(at yardage: Int) -> Double {
-        guard yardage < yardages.count else { return 0 }
-        return yardages[yardage].windageMoa
-    }
-
-    func getVelocity(at yardage: Int) -> Double {
-        guard yardage < yardages.count else { return 0 }
-        return yardages[yardage].velocityFPS
-    }
-
-    func getVelocityX(at yardage: Int) -> Double {
-        guard yardage < yardages.count else { return 0 }
-        return yardages[yardage].velocityXFPS
-    }
-
-    func getVelocityY(at yardage: Int) -> Double {
-        guard yardage < yardages.count else { return 0 }
-        return yardages[yardage].velocityYFPS
-    }
-
-    static func solveBallistics(
-        dragFunction: Drag.DragFunction,
+    init() {}
+    /**
+     Solves the projectile trajectory based on provided ballistic and environmental parameters.
+    
+     This method calculates the trajectory of a projectile, considering factors like aerodynamic drag,
+     initial velocity, sight height, shooting angle, zeroing angle, and wind conditions.
+     It returns key trajectory points, allowing for analysis of the projectile's flight path.
+    
+     - Parameters:
+       - dragCoefficient: The G1 drag coefficient of the projectile, a dimensionless number representing aerodynamic resistance.
+       - initialVelocity: The muzzle velocity of the projectile in meters per second (ft/s).
+       - sightHeight: The height of the sight above the bore axis in inches (in).
+       - shootingAngle: The actual angle of elevation at which the projectile is fired, in degrees.
+       - zeroAngle: The angle of elevation required to zero the firearm, in radians.
+       - windSpeed: The speed of the wind in miles per hour (mph).
+       - windAngle: The direction of the wind relative to the projectile's path, in degrees (0° = tailwind, 90° = crosswind).
+    
+     - Returns:
+       A ballistics object, which contains a set of trajectory points, typically including time, horizontal position, vertical position,
+       and deviations caused by environmental factors (e.g., wind drift).
+    */
+    public static func solve(
         dragCoefficient: Double,
         initialVelocity: Double,
         sightHeight: Double,
@@ -87,7 +58,7 @@ public struct Ballistics {
 
         while true {
             let v = sqrt(vx * vx + vy * vy)
-            let dv = Drag.retard(dragFunction: dragFunction, dragCoefficient: dragCoefficient, vp: v + headwind)
+            let dv = Drag.retard(dragCoefficient: dragCoefficient, projectileVelocity: v + headwind)
             let dvx = -(vx / v) * dv
             let dvy = -(vy / v) * dv
 
@@ -129,19 +100,62 @@ public struct Ballistics {
         return ballistics
     }
 
-    // Constants and Helper Functions
-    let BALLISTICS_COMPUTATION_MAX_YARDS = 1000
+    public func getRange(at yardage: Int) -> Double {
+        guard yardage < yardages.count else { return 0 }
+        return yardages[yardage].rangeYards
+    }
 
-    static func headwindSpeed(windSpeed: Double, windAngle: Double) -> Double {
+    public func getPath(at yardage: Int) -> Double {
+        guard yardage < yardages.count else { return 0 }
+        return yardages[yardage].pathInches
+    }
+
+    public func getMOA(at yardage: Int) -> Double {
+        guard yardage < yardages.count else { return 0 }
+        return yardages[yardage].moaCorrection
+    }
+
+    public func getTime(at yardage: Int) -> Double {
+        guard yardage < yardages.count else { return 0 }
+        return yardages[yardage].seconds
+    }
+
+    public func getWindage(at yardage: Int) -> Double {
+        guard yardage < yardages.count else { return 0 }
+        return yardages[yardage].windageInches
+    }
+
+    public func getWindageMOA(at yardage: Int) -> Double {
+        guard yardage < yardages.count else { return 0 }
+        return yardages[yardage].windageMoa
+    }
+
+    public func getVelocity(at yardage: Int) -> Double {
+        guard yardage < yardages.count else { return 0 }
+        return yardages[yardage].velocityFPS
+    }
+
+    public func getVelocityX(at yardage: Int) -> Double {
+        guard yardage < yardages.count else { return 0 }
+        return yardages[yardage].velocityXFPS
+    }
+
+    public func getVelocityY(at yardage: Int) -> Double {
+        guard yardage < yardages.count else { return 0 }
+        return yardages[yardage].velocityYFPS
+    }
+
+    private let BALLISTICS_COMPUTATION_MAX_YARDS = 1000
+
+    private static func headwindSpeed(windSpeed: Double, windAngle: Double) -> Double {
         return windSpeed * cos(Math.degToRad(windAngle))
     }
 
-    static func crosswindSpeed(windSpeed: Double, windAngle: Double) -> Double {
+    private static func crosswindSpeed(windSpeed: Double, windAngle: Double) -> Double {
         return windSpeed * sin(Math.degToRad(windAngle))
     }
 
-    static func calculateWindage(crosswind: Double, initialVelocity: Double, x: Double, time: Double) -> Double {
-        // Replace this with the actual windage calculation logic
+    private static func calculateWindage(crosswind: Double, initialVelocity: Double, x: Double, time: Double) -> Double {
         return crosswind * time
     }
 }

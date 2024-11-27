@@ -8,11 +8,12 @@
 import Foundation
 
 struct PBR {
-    var nearZeroYards: Int   // nearest scope/projectile intersection
-    var farZeroYards: Int    // furthest scope/projectile intersection
-    var minPBRYards: Int     // nearest target can be for a vitals hit when aiming at center of vitals
-    var maxPBRYards: Int     // furthest target can be for a vitals hit when aiming at center of vitals
-    var sightInAt100Yards: Int // Sight-in at 100 yards, in 100ths of an inch. Positive is above center; negative is below.
+    
+    var nearZeroYards: Int
+    var farZeroYards: Int
+    var minPBRYards: Int
+    var maxPBRYards: Int
+    var sightInAt100Yards: Int
     
     func PBRGetNearZeroYards(pbr: PBR) -> Int {
         return pbr.nearZeroYards
@@ -35,7 +36,6 @@ struct PBR {
     }
     
     func solvePBR(
-        dragFunction: (Double, Double) -> Double,
         dragCoefficient: Double,
         initialVelocity: Double,
         sightHeight: Double,
@@ -79,7 +79,7 @@ struct PBR {
             
             while true {
                 let v = sqrt(vx * vx + vy * vy)
-                let dv = dragFunction(dragCoefficient, v)
+                let dv = Drag.retard(dragCoefficient: dragCoefficient, projectileVelocity: v)
                 let dvx = -(vx / v) * dv
                 let dvy = -(vy / v) * dv
                 

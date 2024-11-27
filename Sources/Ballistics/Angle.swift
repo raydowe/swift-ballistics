@@ -9,8 +9,25 @@ import Foundation
 
 public struct Angle {
 
+    /**
+     Calculates the angle of elevation required to zero a firearm at a specific range.
+
+     This method determines the angle of elevation that aligns the projectile's trajectory
+     with the point of aim at the zero range, considering the drag coefficient, initial velocity,
+     sight height, and the y-intercept (height offset at the muzzle or near the firearm).
+    
+     - Parameters:
+       - dragCoefficient: The G1 drag coefficient of the projectile, representing its aerodynamic properties.
+       - initialVelocity: The muzzle velocity of the projectile in feet per second (f/s).
+       - sightHeight: The height of the sight above the bore axis in inches (in).
+       - zeroRange: The desired zero range in yards (yrd), where the projectile intersects the line of sight.
+       - yIntercept: The vertical offset of the projectile at the muzzle in inches (in).
+
+     - Returns:
+       A `Double` representing the required angle of elevation in radians to achieve the zero range.
+   */
+
     static func zeroAngle(
-        dragFunction: Drag.DragFunction,
         dragCoefficient: Double,
         initialVelocity: Double,
         sightHeight: Double,
@@ -58,7 +75,7 @@ public struct Angle {
                 v = sqrt(vx * vx + vy * vy)
                 dt = 1 / v
 
-                dv = Drag.retard(dragFunction: dragFunction, dragCoefficient: dragCoefficient, vp: v)
+                dv = Drag.retard(dragCoefficient: dragCoefficient, projectileVelocity: v)
                 dvy = -dv * vy / v * dt
                 dvx = -dv * vx / v * dt
 

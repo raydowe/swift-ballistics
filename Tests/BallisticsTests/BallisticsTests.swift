@@ -4,7 +4,6 @@ import Testing
 @Test func testLibrary() async throws {
 
     var bc: Double = 0.414 // The ballistic coefficient for the projectile
-    let dragFunction: Drag.DragFunction = .G1
     let v: Double = 3300 // Initial velocity, in ft/s
     let sh: Double = 1.8 // Sight height over bore, in inches
     let angle: Double = 0 // The shooting angle (uphill/downhill), in degrees
@@ -13,11 +12,10 @@ import Testing
     let windangle: Double = 0 // Wind angle (0=headwind, 90=right to left, etc.)
 
     // Optional: Correct the ballistic coefficient for weather conditions
-    bc = Atmosphere.atmosphereCorrection(dragCoefficient: bc, altitude: 0, barometer: 29.92, temperature: 138, relativeHumidity: 0.0)
+    bc = Atmosphere.adjustCoefficient(dragCoefficient: bc, altitude: 0, barometer: 29.92, temperature: 138, relativeHumidity: 0.0)
 
     // Find the "zero angle"
     let zeroAngle = Angle.zeroAngle(
-        dragFunction: dragFunction,
         dragCoefficient: bc,
         initialVelocity: v,
         sightHeight: sh,
@@ -26,8 +24,7 @@ import Testing
     )
 
     // Generate a full ballistic solution
-    let ballistics = Ballistics.solveBallistics(
-        dragFunction: dragFunction,
+    let solution = Ballistics.solve(
         dragCoefficient: bc,
         initialVelocity: v,
         sightHeight: sh,
@@ -46,9 +43,9 @@ import Testing
 
     var drops: [Point] = []
     for index in stride(from: 0, through: 600, by: 25) {
-        let x = ballistics.getRange(at: index)
-        let y = ballistics.getPath(at: index)
-        let v = ballistics.getVelocity(at: index)
+        let x = solution.getRange(at: index)
+        let y = solution.getPath(at: index)
+        let v = solution.getVelocity(at: index)
         drops.append(Point(range: x, inches: y, velocity: v))
     }
 
