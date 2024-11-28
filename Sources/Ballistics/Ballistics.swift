@@ -37,13 +37,18 @@ public struct Ballistics {
         initialVelocity: Double,
         sightHeight: Double,
         shootingAngle: Double,
-        zeroAngle: Double,
+        zeroRange: Double,
         windSpeed: Double,
         windAngle: Double
     ) -> Ballistics {
-
         var ballistics = Ballistics()
-
+        let zeroAngle = Angle.zeroAngle(
+            dragCoefficient: dragCoefficient,
+            initialVelocity: initialVelocity,
+            sightHeight: sightHeight,
+            zeroRange: zeroRange,
+            yIntercept: 0
+        )
         let headwind = headwindSpeed(windSpeed: windSpeed, windAngle: windAngle)
         let crosswind = crosswindSpeed(windSpeed: windSpeed, windAngle: windAngle)
         let gy = Constants.GRAVITY * cos(Math.degToRad(shootingAngle + zeroAngle))

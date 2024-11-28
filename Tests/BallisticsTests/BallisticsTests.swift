@@ -4,20 +4,11 @@ import Numerics
 
 @Test func testSimple() async throws {
 
-    var bc: Double = 0.414 // The ballistic coefficient for the projectile
+    let bc: Double = 0.414 // The ballistic coefficient for the projectile
     let v: Double = 3300 // Initial velocity, in ft/s
     let sh: Double = 1.8 // Sight height over bore, in inches
     let angle: Double = 0 // The shooting angle (uphill/downhill), in degrees
     let zero: Double = 100 // The zero range of the rifle, in yards
-
-    // Find the "zero angle"
-    let zeroAngle = Angle.zeroAngle(
-        dragCoefficient: bc,
-        initialVelocity: v,
-        sightHeight: sh,
-        zeroRange: zero,
-        yIntercept: 0
-    )
 
     // Generate a full ballistic solution
     let solution = Ballistics.solve(
@@ -25,7 +16,7 @@ import Numerics
         initialVelocity: v,
         sightHeight: sh,
         shootingAngle: angle,
-        zeroAngle: zeroAngle,
+        zeroRange: zero,
         windSpeed: 0,
         windAngle: 0
     )
@@ -88,22 +79,13 @@ import Numerics
     let windspeed: Double = 20 // Wind speed in miles per hour
     let windangle: Double = 135 // Wind angle (0=headwind, 90=right to left, etc.)
 
-    // Find the "zero angle"
-    let zeroAngle = Angle.zeroAngle(
-        dragCoefficient: bc,
-        initialVelocity: v,
-        sightHeight: sh,
-        zeroRange: zero,
-        yIntercept: 0
-    )
-
     // Generate a full ballistic solution
     let solution = Ballistics.solve(
         dragCoefficient: bc,
         initialVelocity: v,
         sightHeight: sh,
         shootingAngle: angle,
-        zeroAngle: zeroAngle,
+        zeroRange: zero,
         windSpeed: windspeed,
         windAngle: windangle
     )
@@ -180,22 +162,13 @@ import Numerics
         relativeHumidity: humidity
     )
 
-    // Find the "zero angle"
-    let zeroAngle = Angle.zeroAngle(
-        dragCoefficient: bc,
-        initialVelocity: v,
-        sightHeight: sh,
-        zeroRange: zero,
-        yIntercept: 0
-    )
-
     // Generate a full ballistic solution
     let solution = Ballistics.solve(
         dragCoefficient: bc,
         initialVelocity: v,
         sightHeight: sh,
         shootingAngle: angle,
-        zeroAngle: zeroAngle,
+        zeroRange: zero,
         windSpeed: windspeed,
         windAngle: windangle
     )
@@ -272,22 +245,13 @@ import Numerics
         relativeHumidity: humidity
     )
 
-    // Find the "zero angle"
-    let zeroAngle = Angle.zeroAngle(
-        dragCoefficient: bc,
-        initialVelocity: v,
-        sightHeight: sh,
-        zeroRange: zero,
-        yIntercept: 0
-    )
-
     // Generate a full ballistic solution
     let solution = Ballistics.solve(
         dragCoefficient: bc,
         initialVelocity: v,
         sightHeight: sh,
         shootingAngle: angle,
-        zeroAngle: zeroAngle,
+        zeroRange: zero,
         windSpeed: windspeed,
         windAngle: windangle
     )
@@ -364,22 +328,13 @@ import Numerics
         relativeHumidity: humidity
     )
 
-    // Find the "zero angle"
-    let zeroAngle = Angle.zeroAngle(
-        dragCoefficient: bc,
-        initialVelocity: v,
-        sightHeight: sh,
-        zeroRange: zero,
-        yIntercept: 0
-    )
-
     // Generate a full ballistic solution
     let solution = Ballistics.solve(
         dragCoefficient: bc,
         initialVelocity: v,
         sightHeight: sh,
         shootingAngle: angle,
-        zeroAngle: zeroAngle,
+        zeroRange: zero,
         windSpeed: windspeed,
         windAngle: windangle
     )
@@ -456,22 +411,13 @@ import Numerics
         relativeHumidity: humidity
     )
 
-    // Find the "zero angle"
-    let zeroAngle = Angle.zeroAngle(
-        dragCoefficient: bc,
-        initialVelocity: v,
-        sightHeight: sh,
-        zeroRange: zero,
-        yIntercept: 0
-    )
-
     // Generate a full ballistic solution
     let solution = Ballistics.solve(
         dragCoefficient: bc,
         initialVelocity: v,
         sightHeight: sh,
         shootingAngle: angle,
-        zeroAngle: zeroAngle,
+        zeroRange: zero,
         windSpeed: windspeed,
         windAngle: windangle
     )

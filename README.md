@@ -45,22 +45,13 @@ bc = Atmosphere.adjustCoefficient(
     relativeHumidity: humidity
 )
 
-// Find the "zero angle"
-let zeroAngle = Angle.zeroAngle(
-    dragCoefficient: bc,
-    initialVelocity: v,
-    sightHeight: sh,
-    zeroRange: zero,
-    yIntercept: 0
-)
-
 // Generate a full ballistic solution
 let solution = Ballistics.solve(
     dragCoefficient: bc,
     initialVelocity: v,
     sightHeight: sh,
     shootingAngle: angle,
-    zeroAngle: zeroAngle,
+    zeroRange: zero,
     windSpeed: windspeed,
     windAngle: windangle
 )
