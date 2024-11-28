@@ -17,7 +17,7 @@ To include `swift-ballistics` in your project, add it as a dependency in your `P
 
 ```swift
 dependencies: [
-    .package(url: "https://github.com/raydowe/swift-ballistics.git", from: "0.1.0")
+    .package(url: "https://github.com/raydowe/swift-ballistics.git", .upToNextMajor(from: "1.0.0"))
 ]
 ```
 
@@ -33,8 +33,8 @@ let temperature: Double = 59 // Atmospheric temperature in degrees Fahrenheit
 let humidity: Double = 0.5 // Relative humidity in percentage between 0 and 1
 let barometer: Double = 29.92 // Barometric pressure in inHg
 let altitude: Double = 0 // Altitude above sea level in feet
-let windspeed: Double = 10 // Wind speed in miles per hour
-let windangle: Double = 75 // The wind angle (0=headwind, 90=right to left, 180=tailwind, 270/-90=left to right)
+let windspeed: Double = 20 // Wind speed in miles per hour
+let windangle: Double = 135 // The wind angle (0=headwind, 90=right to left, 180=tailwind, 270/-90=left to right)
 
 // Optional: Correct the ballistic coefficient for weather conditions
 bc = Atmosphere.adjustCoefficient(
@@ -76,4 +76,13 @@ for range in stride(from: 0, through: 600, by: 25) {
     print("Velocity: \(solution.getVelocity(at: range))")
     print("----")
 }
+
+// Exact range: 200.14087986333354
+// Drop Inches: -1.9360418983287833
+// Drop MOA: 0.923741209531521
+// Windage Inches: 3.7074491959699616
+// Windage MOA: 1.7689304077999195
+// Travel time: 0.19684149571311554
+// Velocity: 2827.5414455293594
+
 ```
