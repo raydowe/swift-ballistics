@@ -28,16 +28,21 @@ let v: Double = 3300 // Initial velocity, in ft/s
 let sh: Double = 1.8 // Sight height over bore, in inches
 let angle: Double = 0 // The shooting angle (uphill/downhill), in degrees
 let zero: Double = 100 // The zero range of the rifle, in yards
+
+let temperature: Double = 59 // Atmospheric temperature in degrees Fahrenheit
+let humidity: Double = 0.5 // Relative humidity in percentage between 0 and 1
+let barometer: Double = 29.92 // Barometric pressure in inHg
+let altitude: Double = 0 // Altitude above sea level in feet
 let windspeed: Double = 10 // Wind speed in miles per hour
 let windangle: Double = 75 // The wind angle (0=headwind, 90=right to left, 180=tailwind, 270/-90=left to right)
 
 // Optional: Correct the ballistic coefficient for weather conditions
 bc = Atmosphere.adjustCoefficient(
     dragCoefficient: bc,
-    altitude: 0,
-    barometer: 29.92,
-    temperature: 138,
-    relativeHumidity: 0.0
+    altitude: altitude,
+    barometer: barometer,
+    temperature: temperature,
+    relativeHumidity: humidity
 )
 
 // Find the "zero angle"
