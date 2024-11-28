@@ -1,5 +1,6 @@
 import Testing
 @testable import Ballistics
+import Numerics
 
 @Test func testLibrary() async throws {
 
@@ -8,11 +9,17 @@ import Testing
     let sh: Double = 1.8 // Sight height over bore, in inches
     let angle: Double = 0 // The shooting angle (uphill/downhill), in degrees
     let zero: Double = 100 // The zero range of the rifle, in yards
-    let windspeed: Double = 0 // Wind speed in miles per hour
-    let windangle: Double = 0 // Wind angle (0=headwind, 90=right to left, etc.)
+    let windspeed: Double = 10 // Wind speed in miles per hour
+    let windangle: Double = 90 // Wind angle (0=headwind, 90=right to left, etc.)
 
     // Optional: Correct the ballistic coefficient for weather conditions
-    bc = Atmosphere.adjustCoefficient(dragCoefficient: bc, altitude: 0, barometer: 29.92, temperature: 138, relativeHumidity: 0.0)
+    bc = Atmosphere.adjustCoefficient(
+        dragCoefficient: bc,
+        altitude: 0,
+        barometer: 29.92,
+        temperature: 59,
+        relativeHumidity: 0.5
+    )
 
     // Find the "zero angle"
     let zeroAngle = Angle.zeroAngle(
@@ -34,46 +41,36 @@ import Testing
         windAngle: windangle
     )
 
-    struct Point: Equatable {
-        let range: Double
-        let inches: Double
-        let velocity: Double
-        var readable: String { "\(range),\(inches),\(velocity)" }
-    }
+    #expect(solution.getRange(at: 0).isApproximatelyEqual(to: 0, absoluteTolerance: 1))
+    #expect(solution.getRange(at: 100).isApproximatelyEqual(to: 100, absoluteTolerance: 1))
+    #expect(solution.getRange(at: 200).isApproximatelyEqual(to: 200, absoluteTolerance: 1))
+    #expect(solution.getRange(at: 300).isApproximatelyEqual(to: 300, absoluteTolerance: 1))
 
-    var drops: [Point] = []
-    for index in stride(from: 0, through: 600, by: 25) {
-        let x = solution.getRange(at: index)
-        let y = solution.getPath(at: index)
-        let v = solution.getVelocity(at: index)
-        drops.append(Point(range: x, inches: y, velocity: v))
-    }
+    #expect(solution.getPath(at: 0).isApproximatelyEqual(to: -1.80, absoluteTolerance: 0.01))
+    #expect(solution.getPath(at: 100).isApproximatelyEqual(to: 0, absoluteTolerance: 0.01))
+    #expect(solution.getPath(at: 200).isApproximatelyEqual(to: -1.94, absoluteTolerance: 0.01))
+    #expect(solution.getPath(at: 300).isApproximatelyEqual(to: -8.25, absoluteTolerance: 0.01))
 
-    #expect(drops.map { $0.readable } == [
-        "0.0,-1.7999999999999998,3300.0000000000005",
-        "25.163827067823906,-1.0298297678135324,3244.427176102468",
-        "50.160999826845206,-0.4718987863729519,3189.94467693073",
-        "75.15816476830241,-0.1275468515712207,3136.1740584072536",
-        "100.15532026196051,-0.004160564690024353,3083.105582490506",
-        "125.15246253681481,-0.10941305604020546,3030.693609855036",
-        "150.149589647502,-0.4512809044546673,2978.930824331706",
-        "175.14669910416714,-1.0380587301006838,2927.8037146921533",
-        "200.1437868389252,-1.878375429241867,2877.2755551473047",
-        "225.1408502106198,-2.981214164321439,2827.3397361557572",
-        "250.1378853126006,-4.355930359726251,2777.9727126925027",
-        "275.13488772994776,-6.012273295565768,2729.1482580357265",
-        "300.13185414467625,-7.960409738972572,2680.8639905675773",
-        "325.1287796029669,-10.210945411942236,2633.096581399448",
-        "350.12565871211115,-12.774951833744577,2585.8226528650657",
-        "375.122487053326,-15.663995364657566,2539.0408885086704",
-        "400.1192597994706,-18.890163714605578,2492.7499655661177",
-        "425.11597095494795,-22.466093690301438,2446.9379546512264",
-        "450.11261266100684,-26.40500482384045,2401.573902133122",
-        "475.1091798969688,-30.720738561631492,2356.6768136047067",
-        "500.1056657260908,-35.42778857610974,2312.2458387632664",
-        "525.1020625662286,-40.54133701724821,2268.2801235097368",
-        "550.0983621275061,-46.07729351782898,2224.7788100204325",
-        "575.0945532440975,-52.05233851600542,2181.7135555426125",
-        "600.0906296766896,-58.483973569441005,2139.1323595038343"
-    ])
+    #expect(solution.getWindage(at: 0).isApproximatelyEqual(to: 0.02, absoluteTolerance: 0.01))
+    #expect(solution.getWindage(at: 100).isApproximatelyEqual(to: 0.66, absoluteTolerance: 0.01))
+    #expect(solution.getWindage(at: 200).isApproximatelyEqual(to: 2.64, absoluteTolerance: 0.01))
+    #expect(solution.getWindage(at: 300).isApproximatelyEqual(to: 6.12, absoluteTolerance: 0.01))
+
+    #expect(solution.getVelocity(at: 0).isApproximatelyEqual(to: 3300, absoluteTolerance: 1))
+    #expect(solution.getVelocity(at: 100).isApproximatelyEqual(to: 3054, absoluteTolerance: 1))
+    #expect(solution.getVelocity(at: 200).isApproximatelyEqual(to: 2823, absoluteTolerance: 1))
+    #expect(solution.getVelocity(at: 300).isApproximatelyEqual(to: 2603, absoluteTolerance: 1))
+
+    #expect(solution.getTime(at: 0).isApproximatelyEqual(to: 0, absoluteTolerance: 0.001))
+    #expect(solution.getTime(at: 100).isApproximatelyEqual(to: 0.094, absoluteTolerance: 0.001))
+    #expect(solution.getTime(at: 200).isApproximatelyEqual(to: 0.196, absoluteTolerance: 0.001))
+    #expect(solution.getTime(at: 300).isApproximatelyEqual(to: 0.307, absoluteTolerance: 0.001))
+
+    #expect(solution.getMOA(at: 100).isApproximatelyEqual(to: 0, absoluteTolerance: 0.01))
+    #expect(solution.getMOA(at: 200).isApproximatelyEqual(to: 0.93, absoluteTolerance: 0.01))
+    #expect(solution.getMOA(at: 300).isApproximatelyEqual(to: 2.62, absoluteTolerance: 0.01))
+
+    #expect(solution.getWindageMOA(at: 100).isApproximatelyEqual(to: 0.63, absoluteTolerance: 0.01))
+    #expect(solution.getWindageMOA(at: 200).isApproximatelyEqual(to: 1.26, absoluteTolerance: 0.01))
+    #expect(solution.getWindageMOA(at: 300).isApproximatelyEqual(to: 1.95, absoluteTolerance: 0.01))
 }

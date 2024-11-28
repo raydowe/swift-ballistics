@@ -69,8 +69,8 @@ public struct Ballistics {
             if x / 3 >= Double(n) {
                 let pathInches = y * 12
                 let moaCorrection = -Math.radToMOA(atan(y / x))
-                let windageInches = calculateWindage(crosswind: crosswind, initialVelocity: initialVelocity, x: x, time: t + dt)
-                let windageMoa = Math.radToMOA(atan(windageInches / 12 / x))
+                let windageInches = windage(windSpeed: crosswind, initialVelocity: initialVelocity, x: x, t: t + dt)
+                let windageMoa = Math.radToMOA(atan((windageInches / 12) / x))
 
                 let point = Point(
                     rangeYards: x / 3,
@@ -155,7 +155,8 @@ public struct Ballistics {
         return windSpeed * sin(Math.degToRad(windAngle))
     }
 
-    private static func calculateWindage(crosswind: Double, initialVelocity: Double, x: Double, time: Double) -> Double {
-        return crosswind * time
+    private static func windage(windSpeed: Double, initialVelocity: Double, x: Double, t: Double) -> Double {
+        let vw = windSpeed * 17.60 // Convert to inches per second
+        return vw * (t - x / initialVelocity)
     }
 }

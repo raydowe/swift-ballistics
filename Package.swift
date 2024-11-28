@@ -8,7 +8,11 @@ let package = Package(
     products: [
         .library(
             name: "Ballistics",
-            targets: ["Ballistics"]),
+            targets: ["Ballistics"]
+        )
+    ],
+    dependencies: [
+        .package(url: "https://github.com/apple/swift-numerics.git", .upToNextMajor(from: "1.0.0"))
     ],
     targets: [
         .target(
@@ -17,7 +21,10 @@ let package = Package(
         ),
         .testTarget(
             name: "BallisticsTests",
-            dependencies: ["Ballistics"]
+            dependencies: [
+                "Ballistics",
+                .product(name: "Numerics", package: "swift-numerics")
+            ]
         ),
     ]
 )
