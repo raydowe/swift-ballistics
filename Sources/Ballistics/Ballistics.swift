@@ -34,11 +34,11 @@ public struct Ballistics {
     */
     public static func solve(
         dragCoefficient: Double,
-        initialVelocity: Double,
-        sightHeight: Double,
+        initialVelocity: ProjectileSpeed,
+        sightHeight: Measurement,
         shootingAngle: Double,
-        zeroRange: Double,
-        windSpeed: Double,
+        zeroRange: Distance,
+        windSpeed: WindSpeed,
         windAngle: Double
     ) -> Ballistics {
         var ballistics = Ballistics()
@@ -49,15 +49,15 @@ public struct Ballistics {
             zeroRange: zeroRange,
             yIntercept: 0
         )
-        let headwind = headwindSpeed(windSpeed: windSpeed, windAngle: windAngle)
-        let crosswind = crosswindSpeed(windSpeed: windSpeed, windAngle: windAngle)
+        let headwind = headwindSpeed(windSpeed: windSpeed.mph, windAngle: windAngle)
+        let crosswind = crosswindSpeed(windSpeed: windSpeed.mph, windAngle: windAngle)
         let gy = Constants.GRAVITY * cos(Math.degToRad(shootingAngle + zeroAngle))
         let gx = Constants.GRAVITY * sin(Math.degToRad(shootingAngle + zeroAngle))
 
-        var vx = initialVelocity * cos(Math.degToRad(zeroAngle))
-        var vy = initialVelocity * sin(Math.degToRad(zeroAngle))
+        var vx = initialVelocity.fps * cos(Math.degToRad(zeroAngle))
+        var vy = initialVelocity.fps * sin(Math.degToRad(zeroAngle))
         var x: Double = 0
-        var y: Double = -sightHeight / 12
+        var y: Double = -sightHeight.inches / 12
         var n = 0
         var t: Double = 0
 
@@ -74,19 +74,19 @@ public struct Ballistics {
             if x / 3 >= Double(n) {
                 let pathInches = y * 12
                 let moaCorrection = -Math.radToMOA(atan(y / x))
-                let windageInches = windage(windSpeed: crosswind, initialVelocity: initialVelocity, x: x, t: t + dt)
+                let windageInches = windage(windSpeed: crosswind, initialVelocity: initialVelocity.fps, x: x, t: t + dt)
                 let windageMoa = Math.radToMOA(atan((windageInches / 12) / x))
 
                 let point = Point(
-                    rangeYards: x / 3,
-                    pathInches: pathInches,
-                    moaCorrection: moaCorrection,
+                    rangeYards: Distance(yards: x / 3),
+                    pathInches: Measurement(inches: pathInches),
+                    correction: Adjustment(moa: moaCorrection),
                     seconds: t + dt,
-                    windageInches: windageInches,
-                    windageMoa: windageMoa,
-                    velocityFPS: v,
-                    velocityXFPS: vx,
-                    velocityYFPS: vy
+                    windageInches: Measurement(inches: windageInches),
+                    windageMoa: Adjustment(moa: windageMoa),
+                    velocityFPS: ProjectileSpeed(fps: v),
+                    velocityXFPS: ProjectileSpeed(fps: vx),
+                    velocityYFPS: ProjectileSpeed(fps: vy)
                 )
                 ballistics.yardages.append(point)
                 n += 1
@@ -105,19 +105,19 @@ public struct Ballistics {
         return ballistics
     }
 
-    public func getRange(at yardage: Int) -> Double {
-        guard yardage < yardages.count else { return 0 }
+    public func getRange(at yardage: Int) -> Distance {
+        guard yardage < yardages.count else { return Distance(yards: 0) }
         return yardages[yardage].rangeYards
     }
 
-    public func getPath(at yardage: Int) -> Double {
-        guard yardage < yardages.count else { return 0 }
+    public func getElevation(at yardage: Int) -> Measurement {
+        guard yardage < yardages.count else { return Measurement(inches: 0) }
         return yardages[yardage].pathInches
     }
 
-    public func getMOA(at yardage: Int) -> Double {
-        guard yardage < yardages.count else { return 0 }
-        return yardages[yardage].moaCorrection
+    public func getElevationCorrection(at yardage: Int) -> Adjustment {
+        guard yardage < yardages.count else { return Adjustment(moa: 0) }
+        return yardages[yardage].correction
     }
 
     public func getTime(at yardage: Int) -> Double {
@@ -125,28 +125,28 @@ public struct Ballistics {
         return yardages[yardage].seconds
     }
 
-    public func getWindage(at yardage: Int) -> Double {
-        guard yardage < yardages.count else { return 0 }
+    public func getWindage(at yardage: Int) -> Measurement {
+        guard yardage < yardages.count else { return Measurement(inches: 0) }
         return yardages[yardage].windageInches
     }
 
-    public func getWindageMOA(at yardage: Int) -> Double {
-        guard yardage < yardages.count else { return 0 }
+    public func getWindageCorrection(at yardage: Int) -> Adjustment {
+        guard yardage < yardages.count else { return Adjustment(moa: 0) }
         return yardages[yardage].windageMoa
     }
 
-    public func getVelocity(at yardage: Int) -> Double {
-        guard yardage < yardages.count else { return 0 }
+    public func getVelocity(at yardage: Int) -> ProjectileSpeed {
+        guard yardage < yardages.count else { return ProjectileSpeed(fps: 0) }
         return yardages[yardage].velocityFPS
     }
 
-    public func getVelocityX(at yardage: Int) -> Double {
-        guard yardage < yardages.count else { return 0 }
+    public func getVelocityX(at yardage: Int) -> ProjectileSpeed {
+        guard yardage < yardages.count else { return ProjectileSpeed(fps: 0) }
         return yardages[yardage].velocityXFPS
     }
 
-    public func getVelocityY(at yardage: Int) -> Double {
-        guard yardage < yardages.count else { return 0 }
+    public func getVelocityY(at yardage: Int) -> ProjectileSpeed {
+        guard yardage < yardages.count else { return ProjectileSpeed(fps: 0) }
         return yardages[yardage].velocityYFPS
     }
 

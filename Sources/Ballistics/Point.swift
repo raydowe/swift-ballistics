@@ -8,13 +8,13 @@
 import Foundation
 
 struct Point {
-    var rangeYards: Double
-    var pathInches: Double
-    var moaCorrection: Double
+    var rangeYards: Distance
+    var pathInches: Measurement
+    var correction: Adjustment
     var seconds: Double
-    var windageInches: Double
-    var windageMoa: Double
-    var velocityFPS: Double  // Total velocity -> vector product of vx and vy
-    var velocityXFPS: Double // Velocity in the bore direction
-    var velocityYFPS: Double // Velocity perpendicular to the bore direction
+    var windageInches: Measurement
+    var windageMoa: Adjustment
+    var velocityFPS: ProjectileSpeed  // Total velocity -> vector product of vx and vy
+    var velocityXFPS: ProjectileSpeed // Velocity in the bore direction
+    var velocityYFPS: ProjectileSpeed // Velocity perpendicular to the bore direction
 }

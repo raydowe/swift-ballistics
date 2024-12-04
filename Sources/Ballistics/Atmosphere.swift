@@ -28,15 +28,15 @@ public struct Atmosphere {
 
     static func adjustCoefficient(
         dragCoefficient: Double,
-        altitude: Double,
-        barometer: Double,
-        temperature: Double,
+        altitude: Altitude,
+        barometer: Pressure,
+        temperature: Temperature,
         relativeHumidity: Double
     ) -> Double {
-        let fa = calcFA(altitude: altitude)
-        let ft = calcFT(temperature: temperature, altitude: altitude)
-        let fr = calcFR(temperature: temperature, pressure: barometer, relativeHumidity: relativeHumidity)
-        let fp = calcFP(pressure: barometer)
+        let fa = calcFA(altitude: altitude.feet)
+        let ft = calcFT(temperature: temperature.fahrenheit, altitude: altitude.feet)
+        let fr = calcFR(temperature: temperature.fahrenheit, pressure: barometer.inHg, relativeHumidity: relativeHumidity)
+        let fp = calcFP(pressure: barometer.inHg)
         let cd = fa * (1 + ft - fp) * fr
         return dragCoefficient * cd
     }
