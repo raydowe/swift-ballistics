@@ -8,13 +8,13 @@
 public struct Adjustment {
 
     public let moa: Double
-    public var mils: Double { moa * 3.43775 }
+    public var mils: Double { moa / 3.43775 }
 
     init(moa: Double) {
         self.moa = moa
     }
 
     init(mils: Double) {
-        self.moa = mils / 3.43775
+        self.moa = mils * 3.43775
     }
 }
