@@ -7,8 +7,8 @@
 
 public struct ProjectileSpeed {
 
-    let fps: Double
-    var ms: Double { fps * 0.3048 }
+    public let fps: Double
+    public var ms: Double { fps * 0.3048 }
 
     public init(fps: Double) {
         self.fps = fps
