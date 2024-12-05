@@ -17,56 +17,38 @@ To include `swift-ballistics` in your project, add it as a dependency in your `P
 
 ```swift
 dependencies: [
-    .package(url: "https://github.com/raydowe/swift-ballistics.git", .upToNextMajor(from: "1.0.0"))
+    .package(url: "https://github.com/raydowe/swift-ballistics.git", .upToNextMajor(from: "2.0.0"))
 ]
 ```
 
 To calculate ballistic data:
 ```swift
-var bc: Double = 0.414 // The G1 ballistic coefficient for the projectile
-let v: Double = 3300 // Initial velocity, in ft/s
-let sh: Double = 1.8 // Sight height over bore, in inches
-let angle: Double = 0 // The shooting angle (uphill/downhill), in degrees
-let zero: Double = 100 // The zero range of the rifle, in yards
-
-let temperature: Double = 59 // Atmospheric temperature in degrees Fahrenheit
-let humidity: Double = 0.5 // Relative humidity in percentage between 0 and 1
-let barometer: Double = 29.92 // Barometric pressure in inHg
-let altitude: Double = 0 // Altitude above sea level in feet
-let windspeed: Double = 20 // Wind speed in miles per hour
-let windangle: Double = 135 // The wind angle (0=headwind, 90=right to left, 180=tailwind, 270/-90=left to right)
-
-// Optional: Correct the ballistic coefficient for weather conditions
-bc = Atmosphere.adjustCoefficient(
-    dragCoefficient: bc,
-    altitude: altitude,
-    barometer: barometer,
-    temperature: temperature,
-    relativeHumidity: humidity
-)
-
 // Generate a full ballistic solution
-let solution = Ballistics.solve(
-    dragCoefficient: bc,
-    initialVelocity: v,
-    sightHeight: sh,
-    shootingAngle: angle,
-    zeroRange: zero,
-    windSpeed: windspeed,
-    windAngle: windangle
-)
+    let solution = Ballistics.solve(
+        dragCoefficient: 0.414, // The G1 ballistic coefficient for the projectile
+        initialVelocity: ProjectileSpeed(fps: 3300),  // Initial velocity, in ft/s
+        sightHeight: Measurement(inches: 1.8), // Sight height over bore
+        shootingAngle: 0, // The shooting angle (uphill/downhill), in degrees
+        zeroRange: Distance(yards: 100), // The zero range
+        atmosphere: Atmosphere( // Optional, if atmospheric conditions should be considered
+            altitude: Altitude(feet: 0), // Altitude above sea level
+            pressure: Pressure(inHg: 29.92), // Barometric pressure in inHg
+            temperature: Temperature(fahrenheit: 59), // Atmospheric temperature
+            relativeHumidity: 0.5 // Relative humidity in percentage between 0 and 1
+        ),
+        windSpeed: WindSpeed(mph: 20), // Wind speed
+        windAngle: 135 // The wind angle (0=headwind, 90=right to left, 180=tailwind, 270/-90=left to right)
+    )
 
 // Print out values at given ranges
-for range in stride(from: 0, through: 600, by: 25) {
-    print("Exact range: \(solution.getRange(at: range))")
-    print("Drop Inches: \(solution.getPath(at: range))")
-    print("Drop MOA: \(solution.getMOA(at: range))")
-    print("Windage Inches: \(solution.getWindage(at: range))")
-    print("Windage MOA: \(solution.getWindageMOA(at: range))")
-    print("Travel time: \(solution.getTime(at: range))")
-    print("Velocity: \(solution.getVelocity(at: range))")
-    print("----")
-}
+let point = solution.getPoint(at: 200)
+print("Exact range: \(point.range.yards)")
+print("Drop Inches: \(point.drop.inches))")
+print("Drop MOA: \(point.dropCorrection.moa))")
+print("Windage Inches: \(point.windage.inches)")
+print("Windage MOA: \(point.windageCorrection.moa)")
+print("Travel time: \(point.seconds)")
+print("Velocity: \(point.velocity.fps))")
 
 // Exact range: 200.14087986333354
 // Drop Inches: -1.9360418983287833
