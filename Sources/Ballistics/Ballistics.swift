@@ -9,7 +9,7 @@ import Foundation
 
 public struct Ballistics {
 
-    var yardages: [Point] = []
+    var distances: [Point] = []
 
     init() {}
     /**
@@ -88,7 +88,7 @@ public struct Ballistics {
                     velocityXFPS: ProjectileSpeed(fps: vx),
                     velocityYFPS: ProjectileSpeed(fps: vy)
                 )
-                ballistics.yardages.append(point)
+                ballistics.distances.append(point)
                 n += 1
             }
 
@@ -105,49 +105,58 @@ public struct Ballistics {
         return ballistics
     }
 
-    public func getRange(at yardage: Int) -> Distance {
-        guard yardage < yardages.count else { return Distance(yards: 0) }
-        return yardages[yardage].rangeYards
+    public func getRange(at distance: Distance) -> Distance {
+        let yards = Int(distance.yards.rounded())
+        guard yards < distances.count else { return Distance(yards: 0) }
+        return distances[yards].rangeYards
     }
 
-    public func getElevation(at yardage: Int) -> Measurement {
-        guard yardage < yardages.count else { return Measurement(inches: 0) }
-        return yardages[yardage].pathInches
+    public func getElevation(at distance: Distance) -> Measurement {
+        let yards = Int(distance.yards.rounded())
+        guard yards < distances.count else { return Measurement(inches: 0) }
+        return distances[yards].pathInches
     }
 
-    public func getElevationCorrection(at yardage: Int) -> Adjustment {
-        guard yardage < yardages.count else { return Adjustment(moa: 0) }
-        return yardages[yardage].correction
+    public func getElevationCorrection(at distance: Distance) -> Adjustment {
+        let yards = Int(distance.yards.rounded())
+        guard yards < distances.count else { return Adjustment(moa: 0) }
+        return distances[yards].correction
     }
 
-    public func getTime(at yardage: Int) -> Double {
-        guard yardage < yardages.count else { return 0 }
-        return yardages[yardage].seconds
+    public func getTime(at distance: Distance) -> Double {
+        let yards = Int(distance.yards.rounded())
+        guard yards < distances.count else { return 0 }
+        return distances[yards].seconds
     }
 
-    public func getWindage(at yardage: Int) -> Measurement {
-        guard yardage < yardages.count else { return Measurement(inches: 0) }
-        return yardages[yardage].windageInches
+    public func getWindage(at distance: Distance) -> Measurement {
+        let yards = Int(distance.yards.rounded())
+        guard yards < distances.count else { return Measurement(inches: 0) }
+        return distances[yards].windageInches
     }
 
-    public func getWindageCorrection(at yardage: Int) -> Adjustment {
-        guard yardage < yardages.count else { return Adjustment(moa: 0) }
-        return yardages[yardage].windageMoa
+    public func getWindageCorrection(at distance: Distance) -> Adjustment {
+        let yards = Int(distance.yards.rounded())
+        guard yards < distances.count else { return Adjustment(moa: 0) }
+        return distances[yards].windageMoa
     }
 
-    public func getVelocity(at yardage: Int) -> ProjectileSpeed {
-        guard yardage < yardages.count else { return ProjectileSpeed(fps: 0) }
-        return yardages[yardage].velocityFPS
+    public func getVelocity(at distance: Distance) -> ProjectileSpeed {
+        let yards = Int(distance.yards.rounded())
+        guard yards < distances.count else { return ProjectileSpeed(fps: 0) }
+        return distances[yards].velocityFPS
     }
 
-    public func getVelocityX(at yardage: Int) -> ProjectileSpeed {
-        guard yardage < yardages.count else { return ProjectileSpeed(fps: 0) }
-        return yardages[yardage].velocityXFPS
+    public func getVelocityX(at distance: Distance) -> ProjectileSpeed {
+        let yards = Int(distance.yards.rounded())
+        guard yards < distances.count else { return ProjectileSpeed(fps: 0) }
+        return distances[yards].velocityXFPS
     }
 
-    public func getVelocityY(at yardage: Int) -> ProjectileSpeed {
-        guard yardage < yardages.count else { return ProjectileSpeed(fps: 0) }
-        return yardages[yardage].velocityYFPS
+    public func getVelocityY(at distance: Distance) -> ProjectileSpeed {
+        let yards = Int(distance.yards.rounded())
+        guard yards < distances.count else { return ProjectileSpeed(fps: 0) }
+        return distances[yards].velocityYFPS
     }
 
     private let BALLISTICS_COMPUTATION_MAX_YARDS = 1000
