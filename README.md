@@ -24,31 +24,31 @@ dependencies: [
 To calculate ballistic data:
 ```swift
 // Generate a full ballistic solution
-    let solution = Ballistics.solve(
-        dragCoefficient: 0.414, // The G1 ballistic coefficient for the projectile
-        initialVelocity: ProjectileSpeed(fps: 3300),  // Initial velocity, in ft/s
-        sightHeight: Measurement(inches: 1.8), // Sight height over bore
-        shootingAngle: 0, // The shooting angle (uphill/downhill), in degrees
-        zeroRange: Distance(yards: 100), // The zero range
-        atmosphere: Atmosphere( // Optional, if atmospheric conditions should be considered
-            altitude: Altitude(feet: 0), // Altitude above sea level
-            pressure: Pressure(inHg: 29.92), // Barometric pressure in inHg
-            temperature: Temperature(fahrenheit: 59), // Atmospheric temperature
-            relativeHumidity: 0.5 // Relative humidity in percentage between 0 and 1
-        ),
-        windSpeed: WindSpeed(mph: 20), // Wind speed
-        windAngle: 135 // The wind angle (0=headwind, 90=right to left, 180=tailwind, 270/-90=left to right)
-    )
+let solution = Ballistics.solve(
+  dragCoefficient: 0.414, // The G1 ballistic coefficient for the projectile
+  initialVelocity: ProjectileSpeed(fps: 3300),  // Initial velocity, in ft/s
+  sightHeight: Measurement(inches: 1.8), // Sight height over bore
+  shootingAngle: 0, // The shooting angle (uphill/downhill), in degrees
+  zeroRange: Distance(yards: 100), // The zero range
+  atmosphere: Atmosphere( // Optional, if atmospheric conditions should be considered
+    altitude: Altitude(feet: 0), // Altitude above sea level
+    pressure: Pressure(inHg: 29.92), // Barometric pressure in inHg
+    temperature: Temperature(fahrenheit: 59), // Atmospheric temperature
+    relativeHumidity: 0.5 // Relative humidity in percentage between 0 and 1
+  ),
+  windSpeed: WindSpeed(mph: 20), // Wind speed
+  windAngle: 135 // The wind angle (0=headwind, 90=right to left, 180=tailwind, 270/-90=left to right)
+)
 
 // Print out values at given ranges
 let point = solution.getPoint(at: 200)
 print("Exact range: \(point.range.yards)")
-print("Drop Inches: \(point.drop.inches))")
-print("Drop MOA: \(point.dropCorrection.moa))")
+print("Drop Inches: \(point.drop.inches)")
+print("Drop MOA: \(point.dropCorrection.moa)")
 print("Windage Inches: \(point.windage.inches)")
 print("Windage MOA: \(point.windageCorrection.moa)")
 print("Travel time: \(point.seconds)")
-print("Velocity: \(point.velocity.fps))")
+print("Velocity: \(point.velocity.fps)")
 
 // Exact range: 200.14087986333354
 // Drop Inches: -1.9360418983287833
