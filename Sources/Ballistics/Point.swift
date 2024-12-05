@@ -8,13 +8,13 @@
 import Foundation
 
 public struct Point {
-    var range: Distance
-    var drop: Measurement
-    var dropCorrection: Adjustment
-    var windage: Measurement
-    var windageCorrection: Adjustment
-    var seconds: Double
-    var velocity: ProjectileSpeed  // Total velocity -> vector product of vx and vy
-    var velocityX: ProjectileSpeed // Velocity in the bore direction
-    var velocityY: ProjectileSpeed // Velocity perpendicular to the bore direction
+    public let range: Distance
+    public let drop: Measurement
+    public let dropCorrection: Adjustment
+    public let windage: Measurement
+    public let windageCorrection: Adjustment
+    public let seconds: Double
+    public let velocity: ProjectileSpeed  // Total velocity -> vector product of vx and vy
+    public let velocityX: ProjectileSpeed // Velocity in the bore direction
+    public let velocityY: ProjectileSpeed // Velocity perpendicular to the bore direction
 }
