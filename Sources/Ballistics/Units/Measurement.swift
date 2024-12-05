@@ -10,11 +10,11 @@ public struct Measurement {
     public let inches: Double
     public var centimeters: Double { inches * 2.54 }
 
-    public init(inches: Double) {
+    init(inches: Double) {
         self.inches = inches
     }
 
-    public init(centimeters: Double) {
+    init(centimeters: Double) {
         self.inches = centimeters / 2.54
     }
 

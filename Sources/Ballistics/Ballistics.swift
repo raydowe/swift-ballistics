@@ -25,6 +25,7 @@ public struct Ballistics {
        - sightHeight: The height of the sight above the bore axis in inches (in).
        - shootingAngle: The actual angle of elevation at which the projectile is fired, in degrees.
        - zeroAngle: The angle of elevation required to zero the firearm, in radians.
+       - atmosphere: The atmospheric conditions to consider. Optional..
        - windSpeed: The speed of the wind in miles per hour (mph).
        - windAngle: The direction of the wind relative to the projectile's path, in degrees (0° = tailwind, 90° = crosswind).
     
@@ -38,12 +39,14 @@ public struct Ballistics {
         sightHeight: Measurement,
         shootingAngle: Double,
         zeroRange: Distance,
+        atmosphere: Atmosphere? = nil,
         windSpeed: WindSpeed,
         windAngle: Double
     ) -> Ballistics {
         var ballistics = Ballistics()
+        let environmentDragCoefficient = atmosphere?.adjustCoefficient(dragCoefficient: dragCoefficient) ?? dragCoefficient
         let zeroAngle = Angle.zeroAngle(
-            dragCoefficient: dragCoefficient,
+            dragCoefficient: environmentDragCoefficient,
             initialVelocity: initialVelocity,
             sightHeight: sightHeight,
             zeroRange: zeroRange,
@@ -63,7 +66,7 @@ public struct Ballistics {
 
         while true {
             let v = sqrt(vx * vx + vy * vy)
-            let dv = Drag.retard(dragCoefficient: dragCoefficient, projectileVelocity: v + headwind)
+            let dv = Drag.retard(dragCoefficient: environmentDragCoefficient, projectileVelocity: v + headwind)
             let dvx = -(vx / v) * dv
             let dvy = -(vy / v) * dv
 
@@ -78,15 +81,15 @@ public struct Ballistics {
                 let windageMoa = Math.radToMOA(atan((windageInches / 12) / x))
 
                 let point = Point(
-                    rangeYards: Distance(yards: x / 3),
-                    pathInches: Measurement(inches: pathInches),
-                    correction: Adjustment(moa: moaCorrection),
+                    range: Distance(yards: x / 3),
+                    drop: Measurement(inches: pathInches),
+                    dropCorrection: Adjustment(moa: moaCorrection),
+                    windage: Measurement(inches: windageInches),
+                    windageCorrection: Adjustment(moa: windageMoa),
                     seconds: t + dt,
-                    windageInches: Measurement(inches: windageInches),
-                    windageMoa: Adjustment(moa: windageMoa),
-                    velocityFPS: ProjectileSpeed(fps: v),
-                    velocityXFPS: ProjectileSpeed(fps: vx),
-                    velocityYFPS: ProjectileSpeed(fps: vy)
+                    velocity: ProjectileSpeed(fps: v),
+                    velocityX: ProjectileSpeed(fps: vx),
+                    velocityY: ProjectileSpeed(fps: vy)
                 )
                 ballistics.distances.append(point)
                 n += 1
@@ -105,61 +108,11 @@ public struct Ballistics {
         return ballistics
     }
 
-    public func getRange(at distance: Distance) -> Distance {
+    public func getPoint(at distance: Distance) -> Point? {
         let yards = Int(distance.yards.rounded())
-        guard yards < distances.count else { return Distance(yards: 0) }
-        return distances[yards].rangeYards
+        guard yards < distances.count else { return nil }
+        return distances[yards]
     }
-
-    public func getElevation(at distance: Distance) -> Measurement {
-        let yards = Int(distance.yards.rounded())
-        guard yards < distances.count else { return Measurement(inches: 0) }
-        return distances[yards].pathInches
-    }
-
-    public func getElevationCorrection(at distance: Distance) -> Adjustment {
-        let yards = Int(distance.yards.rounded())
-        guard yards < distances.count else { return Adjustment(moa: 0) }
-        return distances[yards].correction
-    }
-
-    public func getTime(at distance: Distance) -> Double {
-        let yards = Int(distance.yards.rounded())
-        guard yards < distances.count else { return 0 }
-        return distances[yards].seconds
-    }
-
-    public func getWindage(at distance: Distance) -> Measurement {
-        let yards = Int(distance.yards.rounded())
-        guard yards < distances.count else { return Measurement(inches: 0) }
-        return distances[yards].windageInches
-    }
-
-    public func getWindageCorrection(at distance: Distance) -> Adjustment {
-        let yards = Int(distance.yards.rounded())
-        guard yards < distances.count else { return Adjustment(moa: 0) }
-        return distances[yards].windageMoa
-    }
-
-    public func getVelocity(at distance: Distance) -> ProjectileSpeed {
-        let yards = Int(distance.yards.rounded())
-        guard yards < distances.count else { return ProjectileSpeed(fps: 0) }
-        return distances[yards].velocityFPS
-    }
-
-    public func getVelocityX(at distance: Distance) -> ProjectileSpeed {
-        let yards = Int(distance.yards.rounded())
-        guard yards < distances.count else { return ProjectileSpeed(fps: 0) }
-        return distances[yards].velocityXFPS
-    }
-
-    public func getVelocityY(at distance: Distance) -> ProjectileSpeed {
-        let yards = Int(distance.yards.rounded())
-        guard yards < distances.count else { return ProjectileSpeed(fps: 0) }
-        return distances[yards].velocityYFPS
-    }
-
-    private let BALLISTICS_COMPUTATION_MAX_YARDS = 1000
 
     private static func headwindSpeed(windSpeed: Double, windAngle: Double) -> Double {
         return windSpeed * cos(Math.degToRad(windAngle))

@@ -15,7 +15,6 @@ struct Drag {
         var acceleration: Double = -1
         var mass: Double = -1
 
-
         if projectileVelocity > 4230 { acceleration = 1.477404177730177e-04; mass = 1.9565 }
         else if projectileVelocity > 3680 { acceleration = 1.920339268755614e-04; mass = 1.925 }
         else if projectileVelocity > 3450 { acceleration = 2.894751026819746e-04; mass = 1.875 }

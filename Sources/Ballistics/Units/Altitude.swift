@@ -10,7 +10,7 @@ public struct Altitude {
     let feet: Double
     var meters: Double { feet * 0.3048 }
 
-    public init(feet: Double) {
+    public init(feet: Double = 0) {
         self.feet = feet
     }
 

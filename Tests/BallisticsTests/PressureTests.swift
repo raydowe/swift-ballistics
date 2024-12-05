@@ -14,6 +14,6 @@ import Numerics
     #expect(Pressure(inHg: 29.92).mb.isApproximatelyEqual(to: 1013.20, absoluteTolerance: 0.01))
     #expect(Pressure(kPa: 101.32).inHg.isApproximatelyEqual(to: 29.92, absoluteTolerance: 0.01))
     #expect(Pressure(kPa: 101.32).mb.isApproximatelyEqual(to: 1013.20, absoluteTolerance: 0.01))
-    #expect(Pressure(mb: 1013.20).inHg.isApproximatelyEqual(to: 29.92, absoluteTolerance: 0.01))
-    #expect(Pressure(mb: 1013.20).kPa.isApproximatelyEqual(to: 101.32, absoluteTolerance: 0.01))
+    #expect(Pressure(millibars: 1013.20).inHg.isApproximatelyEqual(to: 29.92, absoluteTolerance: 0.01))
+    #expect(Pressure(millibars: 1013.20).kPa.isApproximatelyEqual(to: 101.32, absoluteTolerance: 0.01))
 }

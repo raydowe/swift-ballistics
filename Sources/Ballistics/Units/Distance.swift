@@ -7,8 +7,8 @@
 
 public struct Distance {
     
-    let yards: Double
-    var meters: Double { yards * 0.9144 }
+    public let yards: Double
+    public var meters: Double { yards * 0.9144 }
 
     public init(yards: Double) {
         self.yards = yards

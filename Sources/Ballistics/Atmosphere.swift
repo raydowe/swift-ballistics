@@ -9,6 +9,23 @@ import Foundation
 
 public struct Atmosphere {
 
+    let altitude: Altitude
+    let pressure: Pressure
+    let temperature: Temperature
+    let relativeHumidity: Double
+
+    public init(
+        altitude: Altitude = Altitude(),
+        pressure: Pressure = Pressure(),
+        temperature: Temperature = Temperature(),
+        relativeHumidity: Double = 0
+    ) {
+        self.altitude = altitude
+        self.pressure = pressure
+        self.temperature = temperature
+        self.relativeHumidity = relativeHumidity
+    }
+
     /**
      Adjusts the ballistic drag coefficient based on atmospheric conditions.
 
@@ -25,42 +42,37 @@ public struct Atmosphere {
        A `Double` representing the adjusted drag coefficient for the given atmospheric conditions.
      */
 
-
-    static func adjustCoefficient(
-        dragCoefficient: Double,
-        altitude: Altitude,
-        barometer: Pressure,
-        temperature: Temperature,
-        relativeHumidity: Double
+    public func adjustCoefficient(
+        dragCoefficient: Double
     ) -> Double {
         let fa = calcFA(altitude: altitude.feet)
         let ft = calcFT(temperature: temperature.fahrenheit, altitude: altitude.feet)
-        let fr = calcFR(temperature: temperature.fahrenheit, pressure: barometer.inHg, relativeHumidity: relativeHumidity)
-        let fp = calcFP(pressure: barometer.inHg)
+        let fr = calcFR(temperature: temperature.fahrenheit, pressure: pressure.inHg, relativeHumidity: relativeHumidity)
+        let fp = calcFP(pressure: pressure.inHg)
         let cd = fa * (1 + ft - fp) * fr
         return dragCoefficient * cd
     }
 
     // Drag coefficient atmospheric corrections
-    private static func calcFR(temperature: Double, pressure: Double, relativeHumidity: Double) -> Double {
+    private func calcFR(temperature: Double, pressure: Double, relativeHumidity: Double) -> Double {
         let VPw = 4e-6 * pow(temperature, 3) - 0.0004 * pow(temperature, 2) + 0.0234 * temperature - 0.2517
         let frh = 0.995 * (pressure / (pressure - (0.3783 * relativeHumidity * VPw)))
         return frh
     }
 
-    private static func calcFP(pressure: Double) -> Double {
+    private func calcFP(pressure: Double) -> Double {
         let pStd = 29.921 // Standard pressure at sea level in inHg
         let fp = (pressure - pStd) / pStd
         return fp
     }
 
-    private static func calcFT(temperature: Double, altitude: Double) -> Double {
+    private func calcFT(temperature: Double, altitude: Double) -> Double {
         let tStd = -0.0036 * altitude + 59
         let ft = (temperature - tStd) / (459.6 + tStd)
         return ft
     }
 
-    private static func calcFA(altitude: Double) -> Double {
+    private func calcFA(altitude: Double) -> Double {
         let fa = -4e-15 * pow(altitude, 3) + 4e-10 * pow(altitude, 2) - 3e-5 * altitude + 1
         return 1 / fa
     }

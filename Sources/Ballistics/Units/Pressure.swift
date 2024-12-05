@@ -11,7 +11,7 @@ public struct Pressure {
     var kPa: Double { inHg * 3.38639 }
     var mb: Double { inHg * 33.8639 }
 
-    public init(inHg: Double) {
+    public init(inHg: Double = 29.92) {
         self.inHg = inHg
     }
 
@@ -19,7 +19,7 @@ public struct Pressure {
         self.inHg = kPa / 3.38639
     }
 
-    public init(mb: Double) {
-        self.inHg = mb / 33.8639
+    public init(millibars: Double) {
+        self.inHg = millibars / 33.8639
     }
 }

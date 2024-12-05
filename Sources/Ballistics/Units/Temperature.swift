@@ -14,7 +14,7 @@ public struct Temperature {
         self.fahrenheit = fahrenheit
     }
 
-    public init(celsius: Double) {
+    public init(celsius: Double = 20) {
         self.fahrenheit = (celsius * 9 / 5) + 32
     }
 }
