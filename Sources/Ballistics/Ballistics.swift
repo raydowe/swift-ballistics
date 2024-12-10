@@ -41,7 +41,8 @@ public struct Ballistics {
         zeroRange: Distance,
         atmosphere: Atmosphere? = nil,
         windSpeed: WindSpeed,
-        windAngle: Double
+        windAngle: Double,
+        weight: Weight = Weight(grains: 0)
     ) -> Ballistics {
         var ballistics = Ballistics()
         let environmentDragCoefficient = atmosphere?.adjustCoefficient(dragCoefficient: dragCoefficient) ?? dragCoefficient
@@ -79,7 +80,7 @@ public struct Ballistics {
                 let moaCorrection = -Math.radToMOA(atan(y / x))
                 let windageInches = windage(windSpeed: crosswind, initialVelocity: initialVelocity.fps, x: x, t: t + dt)
                 let windageMoa = Math.radToMOA(atan((windageInches / 12) / x))
-
+                let ftlbs = weight.grains * (pow(v, 2)) / (2 * 32.163 * 7000)
                 let point = Point(
                     range: Distance(yards: x / 3),
                     drop: Measurement(inches: pathInches),
@@ -89,7 +90,8 @@ public struct Ballistics {
                     seconds: t + dt,
                     velocity: ProjectileSpeed(fps: v),
                     velocityX: ProjectileSpeed(fps: vx),
-                    velocityY: ProjectileSpeed(fps: vy)
+                    velocityY: ProjectileSpeed(fps: vy),
+                    energy: Energy(ftlbs: ftlbs)
                 )
                 ballistics.distances.append(point)
                 n += 1

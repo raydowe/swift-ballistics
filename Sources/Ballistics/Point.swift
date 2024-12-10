@@ -14,7 +14,8 @@ public struct Point {
     public let windage: Measurement
     public let windageCorrection: Adjustment
     public let seconds: Double
-    public let velocity: ProjectileSpeed  // Total velocity -> vector product of vx and vy
-    public let velocityX: ProjectileSpeed // Velocity in the bore direction
-    public let velocityY: ProjectileSpeed // Velocity perpendicular to the bore direction
+    public let velocity: ProjectileSpeed
+    public let velocityX: ProjectileSpeed
+    public let velocityY: ProjectileSpeed
+    public let energy: Energy
 }

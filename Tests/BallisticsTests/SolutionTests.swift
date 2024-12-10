@@ -4,21 +4,16 @@ import Numerics
 
 @Test func testSolutionSimple() async throws {
 
-    let bc: Double = 0.414 // The ballistic coefficient for the projectile
-    let v: Double = 3300 // Initial velocity, in ft/s
-    let sh: Double = 1.8 // Sight height over bore, in inches
-    let angle: Double = 0 // The shooting angle (uphill/downhill), in degrees
-    let zero: Double = 100 // The zero range of the rifle, in yards
-
     // Generate a full ballistic solution
     let solution = Ballistics.solve(
-        dragCoefficient: bc,
-        initialVelocity: ProjectileSpeed(fps: v),
-        sightHeight: Measurement(inches: sh),
-        shootingAngle: angle,
-        zeroRange: Distance(yards: zero),
+        dragCoefficient: 0.414,
+        initialVelocity: ProjectileSpeed(fps: 3300),
+        sightHeight: Measurement(inches: 1.8),
+        shootingAngle: 0,
+        zeroRange: Distance(yards: 100),
         windSpeed: WindSpeed(mph: 0),
-        windAngle: 0
+        windAngle: 0,
+        weight: Weight(grains: 120)
     )
 
     guard let point0 = solution.getPoint(at: Distance(yards: 0)),
@@ -59,6 +54,13 @@ import Numerics
     #expect(point4.velocity.fps.isApproximatelyEqual(to: 2395, absoluteTolerance: 1))
     #expect(point5.velocity.fps.isApproximatelyEqual(to: 2196, absoluteTolerance: 1))
 
+    #expect(point0.energy.ftlbs.isApproximatelyEqual(to: 2902, absoluteTolerance: 1))
+    #expect(point1.energy.ftlbs.isApproximatelyEqual(to: 2487, absoluteTolerance: 1))
+    #expect(point2.energy.ftlbs.isApproximatelyEqual(to: 2125, absoluteTolerance: 1))
+    #expect(point3.energy.ftlbs.isApproximatelyEqual(to: 1808, absoluteTolerance: 1))
+    #expect(point4.energy.ftlbs.isApproximatelyEqual(to: 1529, absoluteTolerance: 1))
+    #expect(point5.energy.ftlbs.isApproximatelyEqual(to: 1285, absoluteTolerance: 1))
+
     #expect(point0.seconds.isApproximatelyEqual(to: 0, absoluteTolerance: 0.01))
     #expect(point1.seconds.isApproximatelyEqual(to: 0.09, absoluteTolerance: 0.01))
     #expect(point2.seconds.isApproximatelyEqual(to: 0.20, absoluteTolerance: 0.01))
@@ -95,7 +97,8 @@ import Numerics
             relativeHumidity: 0.9
         ),
         windSpeed: WindSpeed(mph: 20),
-        windAngle: 135
+        windAngle: 135,
+        weight: Weight(grains: 120)
     )
 
     guard let point0 = solution.getPoint(at: Distance(yards: 0)),
@@ -135,6 +138,13 @@ import Numerics
     #expect(point3.velocity.fps.isApproximatelyEqual(to: 2756, absoluteTolerance: 1))
     #expect(point4.velocity.fps.isApproximatelyEqual(to: 2589, absoluteTolerance: 1))
     #expect(point5.velocity.fps.isApproximatelyEqual(to: 2428, absoluteTolerance: 1))
+
+    #expect(point0.energy.ftlbs.isApproximatelyEqual(to: 2902, absoluteTolerance: 1))
+    #expect(point1.energy.ftlbs.isApproximatelyEqual(to: 2578, absoluteTolerance: 1))
+    #expect(point2.energy.ftlbs.isApproximatelyEqual(to: 2287, absoluteTolerance: 1))
+    #expect(point3.energy.ftlbs.isApproximatelyEqual(to: 2024, absoluteTolerance: 1))
+    #expect(point4.energy.ftlbs.isApproximatelyEqual(to: 1787, absoluteTolerance: 1))
+    #expect(point5.energy.ftlbs.isApproximatelyEqual(to: 1571, absoluteTolerance: 1))
 
     #expect(point0.seconds.isApproximatelyEqual(to: 0, absoluteTolerance: 0.01))
     #expect(point1.seconds.isApproximatelyEqual(to: 0.09, absoluteTolerance: 0.01))
