@@ -37,7 +37,8 @@ let solution = Ballistics.solve(
     relativeHumidity: 0.5 // Relative humidity in percentage between 0 and 1
   ),
   windSpeed: WindSpeed(mph: 20), // Wind speed
-  windAngle: 135 // The wind angle (0=headwind, 90=right to left, 180=tailwind, 270/-90=left to right)
+  windAngle: 135, // The wind angle (0=headwind, 90=right to left, 180=tailwind, 270/-90=left to right)
+  weight: Weight(grains: 120) // The weight of the projectile
 )
 
 // Print out values at given ranges
@@ -49,6 +50,7 @@ print("Windage Inches: \(point.windage.inches)")
 print("Windage MOA: \(point.windageCorrection.moa)")
 print("Travel time: \(point.seconds)")
 print("Velocity: \(point.velocity.fps)")
+print("Energy: \(point.energy.ftlbs)")
 
 // Exact range: 200.14087986333354
 // Drop Inches: -1.9360418983287833
@@ -57,5 +59,6 @@ print("Velocity: \(point.velocity.fps)")
 // Windage MOA: 1.7689304077999195
 // Travel time: 0.19684149571311554
 // Velocity: 2827.5414455293594
+// Energy: 2125.247364066855
 
 ```
