@@ -5,7 +5,7 @@
 //  Created by Raymond Dowe on 04/12/2024.
 //
 
-public struct Altitude {
+public struct Altitude: Equatable, Hashable {
 
     let feet: Double
     var meters: Double { feet * 0.3048 }

@@ -5,7 +5,7 @@
 //  Created by Raymond Dowe on 10/12/2024.
 //
 
-public struct Weight {
+public struct Weight: Equatable, Hashable {
 
     public let grains: Double
     public var grams: Double { grains * 0.06479891 }

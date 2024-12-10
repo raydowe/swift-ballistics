@@ -5,7 +5,7 @@
 //  Created by Raymond Dowe on 04/12/2024.
 //
 
-public struct Pressure {
+public struct Pressure: Equatable, Hashable {
 
     let inHg: Double
     var kPa: Double { inHg * 3.38639 }

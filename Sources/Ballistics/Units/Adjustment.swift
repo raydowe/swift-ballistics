@@ -5,7 +5,7 @@
 //  Created by Raymond Dowe on 04/12/2024.
 //
 
-public struct Adjustment {
+public struct Adjustment: Equatable, Hashable {
 
     public let moa: Double
     public var mils: Double { moa / 3.43775 }

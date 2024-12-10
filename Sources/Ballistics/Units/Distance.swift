@@ -5,8 +5,8 @@
 //  Created by Raymond Dowe on 04/12/2024.
 //
 
-public struct Distance {
-    
+public struct Distance: Equatable, Hashable {
+
     public let yards: Double
     public var meters: Double { yards * 0.9144 }
 

@@ -5,7 +5,7 @@
 //  Created by Raymond Dowe on 04/12/2024.
 //
 
-public struct ProjectileSpeed {
+public struct ProjectileSpeed: Equatable, Hashable {
 
     public let fps: Double
     public var ms: Double { fps * 0.3048 }

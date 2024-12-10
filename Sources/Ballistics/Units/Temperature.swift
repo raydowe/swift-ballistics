@@ -5,7 +5,7 @@
 //  Created by Raymond Dowe on 04/12/2024.
 //
 
-public struct Temperature {
+public struct Temperature: Equatable, Hashable {
 
     let fahrenheit: Double
     var celsius: Double { (fahrenheit - 32) * 5 / 9 }

@@ -7,7 +7,7 @@
 
 import Foundation
 
-public struct Point {
+public struct Point: Equatable, Hashable {
     public let range: Distance
     public let drop: Measurement
     public let dropCorrection: Adjustment
