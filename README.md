@@ -17,7 +17,7 @@ To include `swift-ballistics` in your project, add it as a dependency in your `P
 
 ```swift
 dependencies: [
-    .package(url: "https://github.com/raydowe/swift-ballistics.git", .upToNextMajor(from: "2.0.0"))
+    .package(url: "https://github.com/raydowe/swift-ballistics.git", .upToNextMajor(from: "2.1.0"))
 ]
 ```
 
