@@ -37,7 +37,7 @@ let solution = Ballistics.solve(
     relativeHumidity: 0.5 // Relative humidity in percentage between 0 and 1
   ),
   windSpeed: WindSpeed(mph: 20), // Wind speed
-  windAngle: 135, // The wind angle (0=headwind, 90=right to left, 180=tailwind, 270/-90=left to right)
+  windAngle: 135, // The wind angle (0=headwind, 90=left to right, 180=tailwind, 270/-90=right to left)
   weight: Weight(grains: 120) // The weight of the projectile
 )
 

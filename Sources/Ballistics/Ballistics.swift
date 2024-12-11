@@ -27,7 +27,7 @@ public struct Ballistics {
        - zeroAngle: The angle of elevation required to zero the firearm, in radians.
        - atmosphere: The atmospheric conditions to consider. Optional..
        - windSpeed: The speed of the wind in miles per hour (mph).
-       - windAngle: The direction of the wind relative to the projectile's path, in degrees (0° = tailwind, 90° = crosswind).
+       - windAngle: The direction of the wind relative to the projectile's path, in degrees (0° = headwind, 90° = left to right).
     
      - Returns:
        A ballistics object, which contains a set of trajectory points, typically including time, horizontal position, vertical position,
