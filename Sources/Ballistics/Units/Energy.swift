@@ -9,7 +9,7 @@ public struct Energy: Equatable, Hashable {
     
     public let ftlbs: Double
 
-    init(ftlbs: Double) {
+    public init(ftlbs: Double) {
         self.ftlbs = ftlbs
     }
 }

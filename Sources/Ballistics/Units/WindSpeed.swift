@@ -7,8 +7,8 @@
 
 public struct WindSpeed: Equatable, Hashable {
 
-    let mph: Double
-    var kph: Double { mph * 1.6 }
+    public let mph: Double
+    public var kph: Double { mph * 1.6 }
 
     public init(mph: Double) {
         self.mph = mph

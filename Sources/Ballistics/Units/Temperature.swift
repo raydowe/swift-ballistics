@@ -7,8 +7,8 @@
 
 public struct Temperature: Equatable, Hashable {
 
-    let fahrenheit: Double
-    var celsius: Double { (fahrenheit - 32) * 5 / 9 }
+    public let fahrenheit: Double
+    public var celsius: Double { (fahrenheit - 32) * 5 / 9 }
 
     public init(fahrenheit: Double) {
         self.fahrenheit = fahrenheit

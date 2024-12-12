@@ -7,8 +7,8 @@
 
 public struct Altitude: Equatable, Hashable {
 
-    let feet: Double
-    var meters: Double { feet * 0.3048 }
+    public let feet: Double
+    public var meters: Double { feet * 0.3048 }
 
     public init(feet: Double = 0) {
         self.feet = feet

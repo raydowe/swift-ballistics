@@ -10,11 +10,11 @@ public struct Adjustment: Equatable, Hashable {
     public let moa: Double
     public var mils: Double { moa / 3.43775 }
 
-    init(moa: Double) {
+    public init(moa: Double) {
         self.moa = moa
     }
 
-    init(mils: Double) {
+    public init(mils: Double) {
         self.moa = mils * 3.43775
     }
 }
