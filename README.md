@@ -25,40 +25,40 @@ To calculate ballistic data:
 ```swift
 // Generate a full ballistic solution
 let solution = Ballistics.solve(
-  dragCoefficient: 0.414, // The G1 ballistic coefficient for the projectile
-  initialVelocity: ProjectileSpeed(fps: 3300),  // Initial velocity, in ft/s
-  sightHeight: Measurement(inches: 1.8), // Sight height over bore
-  shootingAngle: 0, // The shooting angle (uphill/downhill), in degrees
-  zeroRange: Distance(yards: 100), // The zero range
-  atmosphere: Atmosphere( // Optional, if atmospheric conditions should be considered
-    altitude: Altitude(feet: 0), // Altitude above sea level
-    pressure: Pressure(inHg: 29.92), // Barometric pressure in inHg
-    temperature: Temperature(fahrenheit: 59), // Atmospheric temperature
-    relativeHumidity: 0.5 // Relative humidity in percentage between 0 and 1
+  dragCoefficient: 0.414,
+  initialVelocity: Measurement<UnitSpeed>(value: 3300, unit: .feetPerSecond),
+  sightHeight: Measurement<UnitLength>(value: 1.8, unit: .inches),
+  shootingAngle: 0,
+  zeroRange: Measurement<UnitLength>(value: 100, unit: .yards),
+  atmosphere: Atmosphere(
+    altitude: Measurement<UnitLength>(value: 10_000, unit: .feet),
+    pressure: Measurement<UnitPressure>(value: 30.1, unit: .inchesOfMercury),
+    temperature: Measurement<UnitTemperature>(value: 5, unit: .fahrenheit),
+    relativeHumidity: 0.5
   ),
-  windSpeed: WindSpeed(mph: 20), // Wind speed
-  windAngle: 135, // The wind angle (0=headwind, 90=left to right, 180=tailwind, 270/-90=right to left)
-  weight: Weight(grains: 120) // The weight of the projectile
+  windSpeed: Measurement<UnitSpeed>(value: 20, unit: .milesPerHour),
+  windAngle: 135,
+  weight: Measurement<UnitMass>(value: 120, unit: .grains)
 )
 
 // Print out values at given ranges
-let point = solution.getPoint(at: 200)
-print("Exact range: \(point.range.yards)")
-print("Drop Inches: \(point.drop.inches)")
-print("Drop MOA: \(point.dropCorrection.moa)")
-print("Windage Inches: \(point.windage.inches)")
-print("Windage MOA: \(point.windageCorrection.moa)")
+let point = solution.getPoint(at: Measurement<UnitLength>(value: 200, unit: .yards))
+print("Exact range: \(point.range)")
+print("Drop Inches: \(point.drop)")
+print("Drop MOA: \(point.dropCorrection)")
+print("Windage Inches: \(point.windage)")
+print("Windage MOA: \(point.windageCorrection)")
 print("Travel time: \(point.seconds)")
-print("Velocity: \(point.velocity.fps)")
-print("Energy: \(point.energy.ftlbs)")
+print("Velocity: \(point.velocity)")
+print("Energy: \(point.energy)")
 
-// Exact range: 200.14087986333354
-// Drop Inches: -1.9360418983287833
-// Drop MOA: 0.923741209531521
-// Windage Inches: 3.7074491959699616
-// Windage MOA: 1.7689304077999195
-// Travel time: 0.19684149571311554
-// Velocity: 2827.5414455293594
-// Energy: 2125.247364066855
+// Exact range: 200.14678896533894 yd
+// Drop: -1.8193914534841453 in
+// Drop Correction: 0.8680583043589494 moa
+// Windage: 2.837364004112233 in
+// Windage Correction: 1.3537478735413964 moa
+// Travel time: 0.19335116796850343
+// Velocity: 2929.55627989206 f/s
+// Energy: 2287.180033060617 ft⋅lbf
 
 ```
