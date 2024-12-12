@@ -85,9 +85,9 @@ public struct Ballistics {
                 let point = Point(
                     range: Measurement(value: x / 3, unit: .yards),
                     drop: Measurement(value: pathInches, unit: .inches),
-                    dropCorrection: Measurement(value: moaDrop, unit: .arcMinutes),
+                    dropCorrection: Measurement(value: moaDrop, unit: .minutesOfAngle),
                     windage: Measurement(value: windageInches, unit: .inches),
-                    windageCorrection: Measurement(value: moaWindage, unit: .arcMinutes),
+                    windageCorrection: Measurement(value: moaWindage, unit: .minutesOfAngle),
                     seconds: t + dt,
                     velocity: Measurement(value: v, unit: .feetPerSecond),
                     velocityX: Measurement(value: vx, unit: .feetPerSecond),

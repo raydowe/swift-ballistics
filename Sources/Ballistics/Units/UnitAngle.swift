@@ -8,6 +8,6 @@
 import Foundation
 
 extension UnitAngle {
-    public static var minutesOfAngle: UnitAngle { .arcMinutes }
+    public static let minutesOfAngle: UnitAngle = UnitAngle(symbol: "moa", converter: UnitConverterLinear(coefficient: 1/60))
     public static let milliradians: UnitAngle = UnitAngle(symbol: "mil", converter: UnitConverterLinear(coefficient: 3.43775))
 }
