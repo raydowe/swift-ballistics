@@ -9,15 +9,15 @@ import Foundation
 
 public struct Atmosphere {
 
-    let altitude: Altitude
-    let pressure: Pressure
-    let temperature: Temperature
+    let altitude: Measurement<UnitLength>
+    let pressure: Measurement<UnitPressure>
+    let temperature: Measurement<UnitTemperature>
     let relativeHumidity: Double
 
     public init(
-        altitude: Altitude = Altitude(),
-        pressure: Pressure = Pressure(),
-        temperature: Temperature = Temperature(),
+        altitude: Measurement<UnitLength> = Measurement<UnitLength>(value: 0, unit: .meters),
+        pressure: Measurement<UnitPressure> = Measurement<UnitPressure>(value: 29.92, unit: .inchesOfMercury),
+        temperature: Measurement<UnitTemperature> = Measurement<UnitTemperature>(value: 10, unit: .celsius),
         relativeHumidity: Double = 0
     ) {
         self.altitude = altitude
@@ -45,10 +45,13 @@ public struct Atmosphere {
     public func adjustCoefficient(
         dragCoefficient: Double
     ) -> Double {
-        let fa = calcFA(altitude: altitude.feet)
-        let ft = calcFT(temperature: temperature.fahrenheit, altitude: altitude.feet)
-        let fr = calcFR(temperature: temperature.fahrenheit, pressure: pressure.inHg, relativeHumidity: relativeHumidity)
-        let fp = calcFP(pressure: pressure.inHg)
+        let altitudeFeet = altitude.converted(to: .feet).value
+        let temperatureFahrenheit = temperature.converted(to: .fahrenheit).value
+        let pressureInHg = pressure.converted(to: .inchesOfMercury).value
+        let fa = calcFA(altitude: altitudeFeet)
+        let ft = calcFT(temperature: temperatureFahrenheit, altitude: altitudeFeet)
+        let fr = calcFR(temperature: temperatureFahrenheit, pressure: pressureInHg, relativeHumidity: relativeHumidity)
+        let fp = calcFP(pressure: pressureInHg)
         let cd = fa * (1 + ft - fp) * fr
         return dragCoefficient * cd
     }

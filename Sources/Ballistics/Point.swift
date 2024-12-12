@@ -8,14 +8,14 @@
 import Foundation
 
 public struct Point: Equatable, Hashable {
-    public let range: Distance
-    public let drop: Measurement
-    public let dropCorrection: Adjustment
-    public let windage: Measurement
-    public let windageCorrection: Adjustment
+    public let range: Measurement<UnitLength>
+    public let drop: Measurement<UnitLength>
+    public let dropCorrection: Measurement<UnitAngle>
+    public let windage: Measurement<UnitLength>
+    public let windageCorrection: Measurement<UnitAngle>
     public let seconds: Double
-    public let velocity: ProjectileSpeed
-    public let velocityX: ProjectileSpeed
-    public let velocityY: ProjectileSpeed
-    public let energy: Energy
+    public let velocity: Measurement<UnitSpeed>
+    public let velocityX: Measurement<UnitSpeed>
+    public let velocityY: Measurement<UnitSpeed>
+    public let energy: Measurement<UnitEnergy>
 }

@@ -29,19 +29,20 @@ public struct Angle {
 
     static func zeroAngle(
         dragCoefficient: Double,
-        initialVelocity: ProjectileSpeed,
-        sightHeight: Measurement,
-        zeroRange: Distance,
+        initialVelocity: Measurement<UnitSpeed>,
+        sightHeight: Measurement<UnitLength>,
+        zeroRange: Measurement<UnitLength>,
         yIntercept: Double
     ) -> Double {
 
         // Numerical Integration variables
-        var dt: Double = 1 / initialVelocity.fps // The solution accuracy generally doesn't suffer if within a foot for each second of time.
-        var y: Double = -sightHeight.inches / 12
+        var dt: Double = 1 / initialVelocity.converted(to: .feetPerSecond).value // The solution accuracy generally doesn't suffer if within a foot for each second of time.
+        var y: Double = -sightHeight.converted(to: .inches).value / 12
         var x: Double = 0
         var da: Double // Change in the bore angle used to iterate toward the correct zero angle.
 
         // State variables for each integration loop
+        let initialVelocityFPS = initialVelocity.converted(to: .feetPerSecond).value
         var v: Double = 0
         var vx: Double = 0
         var vy: Double = 0
@@ -61,15 +62,15 @@ public struct Angle {
 
         // Successive approximation of the bore angle
         while !quit {
-            vy = initialVelocity.fps * sin(angle)
-            vx = initialVelocity.fps * cos(angle)
+            vy = initialVelocityFPS * sin(angle)
+            vx = initialVelocityFPS * cos(angle)
             Gx = Constants.GRAVITY * sin(angle)
             Gy = Constants.GRAVITY * cos(angle)
             
             x = 0
-            y = -sightHeight.inches / 12
+            y = -sightHeight.converted(to: .inches).value / 12
 
-            while x <= zeroRange.yards * 3 {
+            while x <= zeroRange.converted(to: .yards).value * 3 {
                 vy1 = vy
                 vx1 = vx
                 v = sqrt(vx * vx + vy * vy)

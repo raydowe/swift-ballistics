@@ -35,17 +35,18 @@ public struct Ballistics {
     */
     public static func solve(
         dragCoefficient: Double,
-        initialVelocity: ProjectileSpeed,
-        sightHeight: Measurement,
+        initialVelocity: Measurement<UnitSpeed>,
+        sightHeight: Measurement<UnitLength>,
         shootingAngle: Double,
-        zeroRange: Distance,
+        zeroRange: Measurement<UnitLength>,
         atmosphere: Atmosphere? = nil,
-        windSpeed: WindSpeed,
+        windSpeed: Measurement<UnitSpeed>,
         windAngle: Double,
-        weight: Weight = Weight(grains: 0)
+        weight: Measurement<UnitMass> = Measurement<UnitMass>(value: 0, unit: .grains)
     ) -> Ballistics {
         var ballistics = Ballistics()
         let environmentDragCoefficient = atmosphere?.adjustCoefficient(dragCoefficient: dragCoefficient) ?? dragCoefficient
+        let initialVelocityFPS = initialVelocity.converted(to: .feetPerSecond).value
         let zeroAngle = Angle.zeroAngle(
             dragCoefficient: environmentDragCoefficient,
             initialVelocity: initialVelocity,
@@ -53,15 +54,15 @@ public struct Ballistics {
             zeroRange: zeroRange,
             yIntercept: 0
         )
-        let headwind = headwindSpeed(windSpeed: windSpeed.mph, windAngle: windAngle)
-        let crosswind = crosswindSpeed(windSpeed: windSpeed.mph, windAngle: windAngle)
+        let headwind = headwindSpeed(windSpeed: windSpeed.converted(to: .milesPerHour).value, windAngle: windAngle)
+        let crosswind = crosswindSpeed(windSpeed: windSpeed.converted(to: .milesPerHour).value, windAngle: windAngle)
         let gy = Constants.GRAVITY * cos(Math.degToRad(shootingAngle + zeroAngle))
         let gx = Constants.GRAVITY * sin(Math.degToRad(shootingAngle + zeroAngle))
 
-        var vx = initialVelocity.fps * cos(Math.degToRad(zeroAngle))
-        var vy = initialVelocity.fps * sin(Math.degToRad(zeroAngle))
+        var vx = initialVelocityFPS * cos(Math.degToRad(zeroAngle))
+        var vy = initialVelocityFPS * sin(Math.degToRad(zeroAngle))
         var x: Double = 0
-        var y: Double = -sightHeight.inches / 12
+        var y: Double = -sightHeight.converted(to: .inches).value / 12
         var n = 0
         var t: Double = 0
 
@@ -77,21 +78,21 @@ public struct Ballistics {
 
             if x / 3 >= Double(n) {
                 let pathInches = y * 12
-                let moaCorrection = -Math.radToMOA(atan(y / x))
-                let windageInches = windage(windSpeed: crosswind, initialVelocity: initialVelocity.fps, x: x, t: t + dt)
-                let windageMoa = Math.radToMOA(atan((windageInches / 12) / x))
-                let ftlbs = weight.grains * (pow(v, 2)) / (2 * 32.163 * 7000)
+                let moaDrop = -Math.radToMOA(atan(y / x))
+                let windageInches = windage(windSpeed: crosswind, initialVelocity: initialVelocityFPS, x: x, t: t + dt)
+                let moaWindage = Math.radToMOA(atan((windageInches / 12) / x))
+                let ftlbs = weight.converted(to: .grains).value * (pow(v, 2)) / (2 * 32.163 * 7000)
                 let point = Point(
-                    range: Distance(yards: x / 3),
-                    drop: Measurement(inches: pathInches),
-                    dropCorrection: Adjustment(moa: moaCorrection),
-                    windage: Measurement(inches: windageInches),
-                    windageCorrection: Adjustment(moa: windageMoa),
+                    range: Measurement(value: x / 3, unit: .yards),
+                    drop: Measurement(value: pathInches, unit: .inches),
+                    dropCorrection: Measurement(value: moaDrop, unit: .arcMinutes),
+                    windage: Measurement(value: windageInches, unit: .inches),
+                    windageCorrection: Measurement(value: moaWindage, unit: .arcMinutes),
                     seconds: t + dt,
-                    velocity: ProjectileSpeed(fps: v),
-                    velocityX: ProjectileSpeed(fps: vx),
-                    velocityY: ProjectileSpeed(fps: vy),
-                    energy: Energy(ftlbs: ftlbs)
+                    velocity: Measurement(value: v, unit: .feetPerSecond),
+                    velocityX: Measurement(value: vx, unit: .feetPerSecond),
+                    velocityY: Measurement(value: vy, unit: .feetPerSecond),
+                    energy: Measurement(value: ftlbs, unit: .footPounds)
                 )
                 ballistics.distances.append(point)
                 n += 1
@@ -110,8 +111,8 @@ public struct Ballistics {
         return ballistics
     }
 
-    public func getPoint(at distance: Distance) -> Point? {
-        let yards = Int(distance.yards.rounded())
+    public func getPoint(at distance: Measurement<UnitLength>) -> Point? {
+        let yards = Int(distance.converted(to: .yards).value.rounded())
         guard yards < distances.count else { return nil }
         return distances[yards]
     }
