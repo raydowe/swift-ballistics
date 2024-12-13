@@ -15,21 +15,21 @@ import Numerics
     // Generate a full ballistic solution
     let solution = Ballistics.solve(
         dragCoefficient: 0.414,
-        initialVelocity: Measurement<UnitSpeed>(value: 3300, unit: .feetPerSecond),
-        sightHeight: Measurement<UnitLength>(value: 1.8, unit: .inches),
+        initialVelocity: Measurement(value: 3300, unit: .feetPerSecond),
+        sightHeight: Measurement(value: 1.8, unit: .inches),
         shootingAngle: 0,
-        zeroRange: Measurement<UnitLength>(value: 100, unit: .yards),
-        windSpeed: Measurement<UnitSpeed>(value: 0, unit: .milesPerHour),
+        zeroRange: Measurement(value: 100, unit: .yards),
+        windSpeed: Measurement(value: 0, unit: .milesPerHour),
         windAngle: 0,
-        weight: Measurement<UnitMass>(value: 120, unit: .grains)
+        weight: Measurement(value: 120, unit: .grains)
     )
 
-    guard let point0 = solution.getPoint(at: Measurement<UnitLength>(value: 0, unit: .yards)),
-            let point1 = solution.getPoint(at: Measurement<UnitLength>(value: 100, unit: .yards)),
-            let point2 = solution.getPoint(at: Measurement<UnitLength>(value: 200, unit: .yards)),
-            let point3 = solution.getPoint(at: Measurement<UnitLength>(value: 300, unit: .yards)),
-            let point4 = solution.getPoint(at: Measurement<UnitLength>(value: 400, unit: .yards)),
-            let point5 = solution.getPoint(at: Measurement<UnitLength>(value: 500, unit: .yards)) else {
+    guard let point0 = solution.getPoint(at: Measurement(value: 0, unit: .yards)),
+            let point1 = solution.getPoint(at: Measurement(value: 100, unit: .yards)),
+            let point2 = solution.getPoint(at: Measurement(value: 200, unit: .yards)),
+            let point3 = solution.getPoint(at: Measurement(value: 300, unit: .yards)),
+            let point4 = solution.getPoint(at: Measurement(value: 400, unit: .yards)),
+            let point5 = solution.getPoint(at: Measurement(value: 500, unit: .yards)) else {
         Issue.record("Not all points were found")
         return
     }
@@ -94,27 +94,27 @@ import Numerics
     // Generate a full ballistic solution
     let solution = Ballistics.solve(
         dragCoefficient: 0.414,
-        initialVelocity: Measurement<UnitSpeed>(value: 3300, unit: .feetPerSecond),
-        sightHeight: Measurement<UnitLength>(value: 1.8, unit: .inches),
+        initialVelocity: Measurement(value: 3300, unit: .feetPerSecond),
+        sightHeight: Measurement(value: 1.8, unit: .inches),
         shootingAngle: 0,
-        zeroRange: Measurement<UnitLength>(value: 100, unit: .yards),
+        zeroRange: Measurement(value: 100, unit: .yards),
         atmosphere: Atmosphere(
-            altitude: Measurement<UnitLength>(value: 10_000, unit: .feet),
-            pressure: Measurement<UnitPressure>(value: 30.1, unit: .inchesOfMercury),
-            temperature: Measurement<UnitTemperature>(value: 5, unit: .fahrenheit),
+            altitude: Measurement(value: 10_000, unit: .feet),
+            pressure: Measurement(value: 30.1, unit: .inchesOfMercury),
+            temperature: Measurement(value: 5, unit: .fahrenheit),
             relativeHumidity: 0.9
         ),
-        windSpeed: Measurement<UnitSpeed>(value: 20, unit: .milesPerHour),
+        windSpeed: Measurement(value: 20, unit: .milesPerHour),
         windAngle: 135,
-        weight: Measurement<UnitMass>(value: 120, unit: .grains)
+        weight: Measurement(value: 120, unit: .grains)
     )
 
-    guard let point0 = solution.getPoint(at: Measurement<UnitLength>(value: 0, unit: .yards)),
-            let point1 = solution.getPoint(at: Measurement<UnitLength>(value: 100, unit: .yards)),
-            let point2 = solution.getPoint(at: Measurement<UnitLength>(value: 200, unit: .yards)),
-            let point3 = solution.getPoint(at: Measurement<UnitLength>(value: 300, unit: .yards)),
-            let point4 = solution.getPoint(at: Measurement<UnitLength>(value: 400, unit: .yards)),
-          let point5 = solution.getPoint(at: Measurement<UnitLength>(value: 500, unit: .yards)) else {
+    guard let point0 = solution.getPoint(at: Measurement(value: 0, unit: .yards)),
+            let point1 = solution.getPoint(at: Measurement(value: 100, unit: .yards)),
+            let point2 = solution.getPoint(at: Measurement(value: 200, unit: .yards)),
+            let point3 = solution.getPoint(at: Measurement(value: 300, unit: .yards)),
+            let point4 = solution.getPoint(at: Measurement(value: 400, unit: .yards)),
+          let point5 = solution.getPoint(at: Measurement(value: 500, unit: .yards)) else {
         Issue.record("Not all points were found")
         return
     }

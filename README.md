@@ -17,7 +17,7 @@ To include `swift-ballistics` in your project, add it as a dependency in your `P
 
 ```swift
 dependencies: [
-    .package(url: "https://github.com/raydowe/swift-ballistics.git", .upToNextMajor(from: "2.1.0"))
+    .package(url: "https://github.com/raydowe/swift-ballistics.git", .upToNextMajor(from: "3.0.0"))
 ]
 ```
 
@@ -26,23 +26,23 @@ To calculate ballistic data:
 // Generate a full ballistic solution
 let solution = Ballistics.solve(
   dragCoefficient: 0.414,
-  initialVelocity: Measurement<UnitSpeed>(value: 3300, unit: .feetPerSecond),
-  sightHeight: Measurement<UnitLength>(value: 1.8, unit: .inches),
+  initialVelocity: Measurement(value: 3300, unit: .feetPerSecond),
+  sightHeight: Measurement(value: 1.8, unit: .inches),
   shootingAngle: 0,
-  zeroRange: Measurement<UnitLength>(value: 100, unit: .yards),
+  zeroRange: Measurement(value: 100, unit: .yards),
   atmosphere: Atmosphere(
-    altitude: Measurement<UnitLength>(value: 10_000, unit: .feet),
-    pressure: Measurement<UnitPressure>(value: 30.1, unit: .inchesOfMercury),
-    temperature: Measurement<UnitTemperature>(value: 5, unit: .fahrenheit),
+    altitude: Measurement(value: 10_000, unit: .feet),
+    pressure: Measurement(value: 30.1, unit: .inchesOfMercury),
+    temperature: Measurement(value: 5, unit: .fahrenheit),
     relativeHumidity: 0.5
   ),
-  windSpeed: Measurement<UnitSpeed>(value: 20, unit: .milesPerHour),
+  windSpeed: Measurement(value: 20, unit: .milesPerHour),
   windAngle: 135,
-  weight: Measurement<UnitMass>(value: 120, unit: .grains)
+  weight: Measurement(value: 120, unit: .grains)
 )
 
 // Print out values at given ranges
-let point = solution.getPoint(at: Measurement<UnitLength>(value: 200, unit: .yards))
+let point = solution.getPoint(at: Measurement(value: 200, unit: .yards))
 print("Exact range: \(point.range)")
 print("Drop Inches: \(point.drop)")
 print("Drop MOA: \(point.dropCorrection)")
