@@ -8,6 +8,6 @@
 import Foundation
 
 extension UnitAngle {
-    public static let minutesOfAngle: UnitAngle = UnitAngle(symbol: "moa", converter: UnitConverterLinear(coefficient: 1/60))
-    public static let milliradians: UnitAngle = UnitAngle(symbol: "mil", converter: UnitConverterLinear(coefficient: 0.0572958))
+    public static let minutesOfAngle: UnitAngle = UnitAngle(symbol: "MOA", converter: UnitConverterLinear(coefficient: 1/60))
+    public static let milliradians: UnitAngle = UnitAngle(symbol: "MIL", converter: UnitConverterLinear(coefficient: 0.0572958))
 }
