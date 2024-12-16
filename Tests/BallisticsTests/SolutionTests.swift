@@ -10,7 +10,7 @@ import Testing
 import Ballistics
 import Numerics
 
-@Test func testSolutionSimple() async throws {
+@Test func simpleSolution() async throws {
 
     // Generate a full ballistic solution
     let solution = Ballistics.solve(
@@ -24,15 +24,12 @@ import Numerics
         weight: Measurement(value: 120, unit: .grains)
     )
 
-    guard let point0 = solution.getPoint(at: Measurement(value: 0, unit: .yards)),
-            let point1 = solution.getPoint(at: Measurement(value: 100, unit: .yards)),
-            let point2 = solution.getPoint(at: Measurement(value: 200, unit: .yards)),
-            let point3 = solution.getPoint(at: Measurement(value: 300, unit: .yards)),
-            let point4 = solution.getPoint(at: Measurement(value: 400, unit: .yards)),
-            let point5 = solution.getPoint(at: Measurement(value: 500, unit: .yards)) else {
-        Issue.record("Not all points were found")
-        return
-    }
+    let point0 = try #require(solution.getPoint(at: Measurement(value: 0, unit: .yards)))
+    let point1 = try #require(solution.getPoint(at: Measurement(value: 100, unit: .yards)))
+    let point2 = try #require(solution.getPoint(at: Measurement(value: 200, unit: .yards)))
+    let point3 = try #require(solution.getPoint(at: Measurement(value: 300, unit: .yards)))
+    let point4 = try #require(solution.getPoint(at: Measurement(value: 400, unit: .yards)))
+    let point5 = try #require(solution.getPoint(at: Measurement(value: 500, unit: .yards)))
 
     #expect(point0.range.converted(to: .yards).value.isApproximatelyEqual(to: 0, absoluteTolerance: 1))
     #expect(point1.range.converted(to: .yards).value.isApproximatelyEqual(to: 100, absoluteTolerance: 1))
@@ -89,7 +86,7 @@ import Numerics
     #expect(point5.windageCorrection.converted(to: .minutesOfAngle).value.isApproximatelyEqual(to: 0, absoluteTolerance: 0.01))
 }
 
-@Test func testSolutionWithAtmosphere() async throws {
+@Test func solutionWithAtmosphere() async throws {
 
     // Generate a full ballistic solution
     let solution = Ballistics.solve(
@@ -109,15 +106,12 @@ import Numerics
         weight: Measurement(value: 120, unit: .grains)
     )
 
-    guard let point0 = solution.getPoint(at: Measurement(value: 0, unit: .yards)),
-            let point1 = solution.getPoint(at: Measurement(value: 100, unit: .yards)),
-            let point2 = solution.getPoint(at: Measurement(value: 200, unit: .yards)),
-            let point3 = solution.getPoint(at: Measurement(value: 300, unit: .yards)),
-            let point4 = solution.getPoint(at: Measurement(value: 400, unit: .yards)),
-          let point5 = solution.getPoint(at: Measurement(value: 500, unit: .yards)) else {
-        Issue.record("Not all points were found")
-        return
-    }
+    let point0 = try #require(solution.getPoint(at: Measurement(value: 0, unit: .yards)))
+    let point1 = try #require(solution.getPoint(at: Measurement(value: 100, unit: .yards)))
+    let point2 = try #require(solution.getPoint(at: Measurement(value: 200, unit: .yards)))
+    let point3 = try #require(solution.getPoint(at: Measurement(value: 300, unit: .yards)))
+    let point4 = try #require(solution.getPoint(at: Measurement(value: 400, unit: .yards)))
+    let point5 = try #require(solution.getPoint(at: Measurement(value: 500, unit: .yards)))
 
     #expect(point0.range.converted(to: .yards).value.isApproximatelyEqual(to: 0, absoluteTolerance: 1))
     #expect(point1.range.converted(to: .yards).value.isApproximatelyEqual(to: 100, absoluteTolerance: 1))
