@@ -17,7 +17,7 @@ import Numerics
         dragCoefficient: 0.414,
         initialVelocity: Measurement(value: 3300, unit: .feetPerSecond),
         sightHeight: Measurement(value: 1.8, unit: .inches),
-        shootingAngle: 0,
+        shootingAngle: Measurement(value: 0, unit: .degrees),
         zeroRange: Measurement(value: 100, unit: .yards),
         windSpeed: Measurement(value: 0, unit: .milesPerHour),
         windAngle: 0,
@@ -93,7 +93,7 @@ import Numerics
         dragCoefficient: 0.414,
         initialVelocity: Measurement(value: 3300, unit: .feetPerSecond),
         sightHeight: Measurement(value: 1.8, unit: .inches),
-        shootingAngle: 0,
+        shootingAngle: Measurement(value: 0, unit: .degrees),
         zeroRange: Measurement(value: 100, unit: .yards),
         atmosphere: Atmosphere(
             altitude: Measurement(value: 10_000, unit: .feet),

@@ -23,7 +23,7 @@ public struct Ballistics {
        - dragCoefficient: The G1 drag coefficient of the projectile, a dimensionless number representing aerodynamic resistance.
        - initialVelocity: The muzzle velocity of the projectile in meters per second (ft/s).
        - sightHeight: The height of the sight above the bore axis in inches (in).
-       - shootingAngle: The actual angle of elevation at which the projectile is fired, in degrees.
+       - shootingAngle: The actual angle of elevation at which the projectile is fired, in degrees. Positive is up, negative is down.
        - zeroAngle: The angle of elevation required to zero the firearm, in radians.
        - atmosphere: The atmospheric conditions to consider. Optional..
        - windSpeed: The speed of the wind in miles per hour (mph).
@@ -37,7 +37,7 @@ public struct Ballistics {
         dragCoefficient: Double,
         initialVelocity: Measurement<UnitSpeed>,
         sightHeight: Measurement<UnitLength>,
-        shootingAngle: Double,
+        shootingAngle: Measurement<UnitAngle>,
         zeroRange: Measurement<UnitLength>,
         atmosphere: Atmosphere? = nil,
         windSpeed: Measurement<UnitSpeed>,
@@ -56,8 +56,8 @@ public struct Ballistics {
         )
         let headwind = headwindSpeed(windSpeed: windSpeed.converted(to: .milesPerHour).value, windAngle: windAngle)
         let crosswind = crosswindSpeed(windSpeed: windSpeed.converted(to: .milesPerHour).value, windAngle: windAngle)
-        let gy = Constants.GRAVITY * cos(Math.degToRad(shootingAngle + zeroAngle))
-        let gx = Constants.GRAVITY * sin(Math.degToRad(shootingAngle + zeroAngle))
+        let gy = Constants.GRAVITY * cos(Math.degToRad(shootingAngle.converted(to: .degrees).value + zeroAngle))
+        let gx = Constants.GRAVITY * sin(Math.degToRad(shootingAngle.converted(to: .degrees).value + zeroAngle))
 
         var vx = initialVelocityFPS * cos(Math.degToRad(zeroAngle))
         var vy = initialVelocityFPS * sin(Math.degToRad(zeroAngle))

@@ -28,7 +28,7 @@ let solution = Ballistics.solve(
   dragCoefficient: 0.414, // The G1 drag coefficient of the projectile
   initialVelocity: Measurement(value: 3300, unit: .feetPerSecond), // The initial velocity of the projectile
   sightHeight: Measurement(value: 1.8, unit: .inches), // The distance the sight is offset from the bore
-  shootingAngle: 0, // The angle up (+) or down (-) of the shot
+  shootingAngle: Measurement(value: 0, unit: .degrees), // The angle up (+) or down (-) of the shot
   zeroRange: Measurement(value: 100, unit: .yards), // The distance the projectile is zeroed at
   atmosphere: Atmosphere(
     altitude: Measurement(value: 10_000, unit: .feet), // The altitude above sea level
