@@ -8,7 +8,6 @@
 import Foundation
 
 struct Angle {
-
     /**
      Calculates the angle of elevation required to zero a firearm at a specific range using an iterative solver.
 
@@ -19,6 +18,7 @@ struct Angle {
      - Parameter simulation: The simulation object containing all projectile and environmental parameters.
      - Returns: A `Double` representing the required angle of elevation in radians.
    */
+    
     static func zeroAngle(for simulation: Simulation) -> Double {
 
         let yIntercept: Double = 0 // Assuming the target is at the same height as the scope
