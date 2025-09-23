@@ -14,7 +14,8 @@ public struct Ballistics {
     init() {}
 
     public static func solve(
-        dragCoefficient: Double,
+        dragModel: DragModel,
+        ballisticCoefficient: Double,
         initialVelocity: Measurement<UnitSpeed>,
         sightHeight: Measurement<UnitLength>,
         shootingAngle: Measurement<UnitAngle>,
@@ -25,7 +26,8 @@ public struct Ballistics {
         weight: Measurement<UnitMass> = Measurement<UnitMass>(value: 0, unit: .grams)
     ) -> Ballistics {
         var simulation = Simulation(
-            dragCoefficient: dragCoefficient,
+            dragModel: dragModel,
+            ballisticCoefficient: ballisticCoefficient,
             initialVelocity: initialVelocity,
             sightHeight: sightHeight,
             shootingAngle: shootingAngle,
@@ -47,12 +49,13 @@ public struct Ballistics {
 
 private struct Simulation {
     // input parameters
-    let dragCoefficient: Double
+    let dragModel: DragModel
+    let ballisticCoefficient: Double
     let initialVelocity: Measurement<UnitSpeed>
     let sightHeight: Measurement<UnitLength>
     let shootingAngle: Measurement<UnitAngle>
     let zeroRange: Measurement<UnitLength>
-    let atmosphere: Atmosphere?
+    let atmosphere: Atmosphere
     let windSpeed: Measurement<UnitSpeed>
     let windAngle: Double
     let weight: Measurement<UnitMass>
@@ -63,7 +66,8 @@ private struct Simulation {
     var n: Int
 
     init(
-        dragCoefficient: Double,
+        dragModel: DragModel,
+        ballisticCoefficient: Double,
         initialVelocity: Measurement<UnitSpeed>,
         sightHeight: Measurement<UnitLength>,
         shootingAngle: Measurement<UnitAngle>,
@@ -73,12 +77,13 @@ private struct Simulation {
         windAngle: Double,
         weight: Measurement<UnitMass>
     ) {
-        self.dragCoefficient = dragCoefficient
+        self.dragModel = dragModel
+        self.ballisticCoefficient = ballisticCoefficient
         self.initialVelocity = initialVelocity
         self.sightHeight = sightHeight
         self.shootingAngle = shootingAngle
         self.zeroRange = zeroRange
-        self.atmosphere = atmosphere
+        self.atmosphere = atmosphere ?? Atmosphere()
         self.windSpeed = windSpeed
         self.windAngle = windAngle
         self.weight = weight
@@ -92,8 +97,14 @@ private struct Simulation {
     }
 
     mutating func run() -> Ballistics {
-        let environmentDragCoefficient = atmosphere?.adjustCoefficient(dragCoefficient: dragCoefficient) ?? dragCoefficient
         let initialVelocityMPS = initialVelocity.converted(to: .metersPerSecond).value
+
+        // For the zero angle calculation, we can't use the full modern physics model
+        // as it would require a complex iterative solver. We will use the old method
+        // with a standard G1 BC for this part, as it's a close enough approximation
+        // to find the initial angle.
+        let approxG1BC = (dragModel == .g7) ? ballisticCoefficient * 1.9 : ballisticCoefficient
+        let environmentDragCoefficient = atmosphere.adjustCoefficient(dragCoefficient: approxG1BC)
 
         let zeroAngle = Angle.zeroAngle(
             dragCoefficient: environmentDragCoefficient,
@@ -114,11 +125,18 @@ private struct Simulation {
         let gy = Constants.GRAVITY * cos(shootingAngleRad + zeroAngle)
         let gx = Constants.GRAVITY * sin(shootingAngleRad + zeroAngle)
 
+        let airDensity = atmosphere.airDensity()
+
         while true {
             let v = sqrt(vx * vx + vy * vy)
-            let dv = Drag.retard(dragCoefficient: environmentDragCoefficient, projectileVelocity: v + headwind)
-            let dvx = -(vx / v) * dv
-            let dvy = -(vy / v) * dv
+            let v_air = v + headwind // Velocity relative to the air
+
+            // Modern retardation calculation
+            let cd = Drag.coefficient(for: self.dragModel, velocity: v_air, atmosphere: self.atmosphere)
+            let retardation = (0.5 * airDensity * v_air * v_air * cd) / self.ballisticCoefficient
+
+            let dvx = -(vx / v) * retardation
+            let dvy = -(vy / v) * retardation
 
             let dt = Constants.SIMULATION_TIME_STEP_FACTOR / v
 

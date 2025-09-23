@@ -9,6 +9,55 @@ import Foundation
 
 struct Drag {
 
+    /**
+     Calculates the drag coefficient (Cd) for a given projectile velocity and atmospheric conditions.
+     - Parameters:
+        - model: The drag model to use (e.g., .g1, .g7).
+        - velocity: The projectile's velocity in meters per second.
+        - atmosphere: The atmospheric conditions.
+     - Returns: The calculated drag coefficient (Cd).
+    */
+    static func coefficient(for model: DragModel, velocity: Double, atmosphere: Atmosphere) -> Double {
+        let dragTable: [DragTable]
+        switch model {
+        case .g1:
+            dragTable = g1DragTable
+        case .g7:
+            dragTable = g7DragTable
+        }
+
+        let speedOfSound = atmosphere.speedOfSound()
+        guard speedOfSound > 0 else { return 0 }
+
+        let machValue = velocity / speedOfSound
+
+        // Find the two points in the table that bracket the mach value
+        guard let upperIndex = dragTable.firstIndex(where: { $0.mach >= machValue }) else {
+            // If mach value is higher than table, return the last value
+            return dragTable.last?.cd ?? 0
+        }
+
+        if upperIndex == 0 {
+            return dragTable.first?.cd ?? 0
+        }
+
+        let lowerIndex = upperIndex - 1
+        let lowerPoint = dragTable[lowerIndex]
+        let upperPoint = dragTable[upperIndex]
+
+        // Linear interpolation
+        let machRange = upperPoint.mach - lowerPoint.mach
+        guard machRange > 0 else { return lowerPoint.cd }
+
+        let cdRange = upperPoint.cd - lowerPoint.cd
+        let machFraction = (machValue - lowerPoint.mach) / machRange
+
+        let interpolatedCd = lowerPoint.cd + (cdRange * machFraction)
+
+        return interpolatedCd
+    }
+
+    @available(*, deprecated, message: "Use coefficient(for:velocity:atmosphere:) instead. This function uses an outdated, hardcoded G1 model.")
     static func retard(dragCoefficient: Double, projectileVelocity: Double) -> Double {
         // projectileVelocity is in meters per second. This function works with feet per second internally.
         let projectileVelocityFPS = projectileVelocity * 3.28084 // m/s to ft/s
@@ -53,7 +102,7 @@ struct Drag {
         else if projectileVelocityFPS > 750 { acceleration = 6.824429329105383e-07; mass = 2.625 }
         else if projectileVelocityFPS > 700 { acceleration = 3.569169672385163e-06; mass = 2.375 }
         else if projectileVelocityFPS > 640 { acceleration = 1.839015095899579e-05; mass = 2.125 }
-        else if projectileVelocityFPS > 600 { acceleration = 5.71117468873424e-05; mass = 1.95 }
+        else if projectileVelocityFPS > 600 { acceleration = 5.71117468873424e-05 ; mass = 1.950 }
         else if projectileVelocityFPS > 550 { acceleration = 9.226557091973427e-05; mass = 1.875 }
         else if projectileVelocityFPS > 250 { acceleration = 9.337991957131389e-05; mass = 1.875 }
         else if projectileVelocityFPS > 100 { acceleration = 7.225247327590413e-05; mass = 1.925 }
