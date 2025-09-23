@@ -159,7 +159,6 @@ internal struct Simulation {
             let v = sqrt(vx * vx + vy * vy)
             if v == 0 { break }
             let v_air = v + headwind
-
             let cd = Drag.coefficient(for: self.dragModel, velocity: v_air, atmosphere: self.atmosphere)
             let retardation = (0.5 * airDensity * v_air * v_air * cd) / self.ballisticCoefficient
 
@@ -198,6 +197,7 @@ internal struct Simulation {
                     windageCorrectionClicks: windageClicks
                 )
                 points.append(point)
+
                 n += 1
             }
 

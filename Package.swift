@@ -5,7 +5,7 @@ import PackageDescription
 
 let package = Package(
     name: "swift-ballistics",
-    platforms: [.iOS(.v18), .macOS(.v15), .watchOS(.v11)],
+    platforms: [.iOS(.v13), .macOS(.v10_15), .watchOS(.v6)],
     products: [
         .library(
             name: "Ballistics",
