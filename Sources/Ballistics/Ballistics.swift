@@ -62,7 +62,7 @@ public struct Ballistics {
         var vx = initialVelocityFPS * cos(Math.degToRad(zeroAngle))
         var vy = initialVelocityFPS * sin(Math.degToRad(zeroAngle))
         var x: Double = 0
-        var y: Double = -sightHeight.converted(to: .inches).value / 12
+        var y: Double = -sightHeight.converted(to: .inches).value / Constants.INCHES_PER_FOOT
         var n = 0
         var t: Double = 0
 
@@ -73,17 +73,19 @@ public struct Ballistics {
             let dvy = -(vy / v) * dv
 
             let dt = 0.5 / v
+            let oldVx = vx
+            let oldVy = vy
             vx += dt * dvx + dt * gx
             vy += dt * dvy + dt * gy
 
-            if x / 3 >= Double(n) {
-                let pathInches = y * 12
+            if x / Constants.FEET_PER_YARD >= Double(n) {
+                let pathInches = y * Constants.INCHES_PER_FOOT
                 let moaDrop = -Math.radToMOA(atan(y / x))
                 let windageInches = windage(windSpeed: crosswind, initialVelocity: initialVelocityFPS, x: x, t: t + dt)
-                let moaWindage = Math.radToMOA(atan((windageInches / 12) / x))
-                let ftlbs = weight.converted(to: .grains).value * (pow(v, 2)) / (2 * 32.163 * 7000)
+                let moaWindage = Math.radToMOA(atan((windageInches / Constants.INCHES_PER_FOOT) / x))
+                let ftlbs = weight.converted(to: .grains).value * (pow(v, 2)) / (2 * abs(Constants.GRAVITY) * Constants.GRAINS_PER_POUND)
                 let point = Point(
-                    range: Measurement(value: x / 3, unit: .yards),
+                    range: Measurement(value: x / Constants.FEET_PER_YARD, unit: .yards),
                     drop: Measurement(value: pathInches, unit: .inches),
                     dropCorrection: Measurement(value: moaDrop, unit: .minutesOfAngle),
                     windage: Measurement(value: windageInches, unit: .inches),
@@ -98,8 +100,8 @@ public struct Ballistics {
                 n += 1
             }
 
-            x += dt * (vx + vx) / 2
-            y += dt * (vy + vy) / 2
+            x += dt * (vx + oldVx) / 2
+            y += dt * (vy + oldVy) / 2
 
             if abs(vy) > abs(3 * vx) || n >= Constants.BALLISTICS_COMPUTATION_MAX_YARDS {
                 break
@@ -126,7 +128,7 @@ public struct Ballistics {
     }
 
     private static func windage(windSpeed: Double, initialVelocity: Double, x: Double, t: Double) -> Double {
-        let vw = windSpeed * 17.60 // Convert to inches per second
+        let vw = windSpeed * Constants.MPH_TO_INCHES_PER_SECOND // Convert to inches per second
         return vw * (t - x / initialVelocity)
     }
 }
