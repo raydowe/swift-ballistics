@@ -7,18 +7,18 @@
 
 import Foundation
 
-enum DragModel {
+public enum DragModel {
     case g1
     case g7
 }
 
-struct DragTable {
+internal struct DragTable {
     let mach: Double
     let cd: Double
 }
 
 // Standard G1 drag model data table
-let g1DragTable: [DragTable] = [
+internal let g1DragTable: [DragTable] = [
     DragTable(mach: 0.00, cd: 0.2629),
     DragTable(mach: 0.05, cd: 0.2558),
     DragTable(mach: 0.10, cd: 0.2487),
@@ -101,7 +101,7 @@ let g1DragTable: [DragTable] = [
 ]
 
 // Standard G7 drag model data table
-let g7DragTable: [DragTable] = [
+internal let g7DragTable: [DragTable] = [
     DragTable(mach: 0.00, cd: 0.1198),
     DragTable(mach: 0.05, cd: 0.1197),
     DragTable(mach: 0.10, cd: 0.1196),

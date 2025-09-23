@@ -9,9 +9,11 @@ import Foundation
 
 public struct Ballistics {
 
-    var distances: [Point] = []
-
-    init() {}
+    public var distances: [Point] = []
+    
+    private init(distances: [Point]) {
+        self.distances = distances
+    }
 
     public static func solve(
         dragModel: DragModel,
@@ -23,59 +25,59 @@ public struct Ballistics {
         atmosphere: Atmosphere? = nil,
         windSpeed: Measurement<UnitSpeed>,
         windAngle: Double,
-        weight: Measurement<UnitMass> = Measurement<UnitMass>(value: 0, unit: .grams)
+        weight: Measurement<UnitMass>,
+        scopeClickValue: Double? = nil
     ) -> Ballistics {
-        var simulation = Simulation(
+        let simulation = Simulation(
             dragModel: dragModel,
             ballisticCoefficient: ballisticCoefficient,
-            initialVelocity: initialVelocity,
-            sightHeight: sightHeight,
-            shootingAngle: shootingAngle,
-            zeroRange: zeroRange,
-            atmosphere: atmosphere,
-            windSpeed: windSpeed,
+            initialVelocity: initialVelocity.converted(to: .metersPerSecond).value,
+            sightHeight: sightHeight.converted(to: .meters).value,
+            shootingAngle: shootingAngle.converted(to: .radians).value,
+            zeroRange: zeroRange.converted(to: .meters).value,
+            atmosphere: atmosphere ?? Atmosphere(),
+            windSpeed: windSpeed.converted(to: .metersPerSecond).value,
             windAngle: windAngle,
-            weight: weight
+            weight: weight.converted(to: .kilograms).value,
+            scopeClickValue: scopeClickValue
         )
         return simulation.run()
     }
 
     public func getPoint(at distance: Measurement<UnitLength>) -> Point? {
-        let meters = Int(distance.converted(to: .meters).value.rounded())
-        guard meters < distances.count else { return nil }
-        return distances[meters]
+        let meters = distance.converted(to: .meters).value
+        // Find the closest point in the distances array
+        return distances.min(by: { abs($0.range - meters) < abs($1.range - meters) })
     }
 }
 
-private struct Simulation {
-    // input parameters
+// Internal Simulation class to handle the actual calculation
+internal struct Simulation {
+    // input parameters - all in SI units
     let dragModel: DragModel
     let ballisticCoefficient: Double
-    let initialVelocity: Measurement<UnitSpeed>
-    let sightHeight: Measurement<UnitLength>
-    let shootingAngle: Measurement<UnitAngle>
-    let zeroRange: Measurement<UnitLength>
+    let initialVelocity: Double
+    let sightHeight: Double
+    let shootingAngle: Double
+    let zeroRange: Double
     let atmosphere: Atmosphere
-    let windSpeed: Measurement<UnitSpeed>
+    let windSpeed: Double
     let windAngle: Double
-    let weight: Measurement<UnitMass>
-
-    // state variables
-    var ballistics = Ballistics()
-    var vx, vy, x, y, t: Double
-    var n: Int
+    let weight: Double
+    let scopeClickValue: Double?
 
     init(
         dragModel: DragModel,
         ballisticCoefficient: Double,
-        initialVelocity: Measurement<UnitSpeed>,
-        sightHeight: Measurement<UnitLength>,
-        shootingAngle: Measurement<UnitAngle>,
-        zeroRange: Measurement<UnitLength>,
-        atmosphere: Atmosphere?,
-        windSpeed: Measurement<UnitSpeed>,
+        initialVelocity: Double,
+        sightHeight: Double,
+        shootingAngle: Double,
+        zeroRange: Double,
+        atmosphere: Atmosphere,
+        windSpeed: Double,
         windAngle: Double,
-        weight: Measurement<UnitMass>
+        weight: Double,
+        scopeClickValue: Double?
     ) {
         self.dragModel = dragModel
         self.ballisticCoefficient = ballisticCoefficient
@@ -83,117 +85,131 @@ private struct Simulation {
         self.sightHeight = sightHeight
         self.shootingAngle = shootingAngle
         self.zeroRange = zeroRange
-        self.atmosphere = atmosphere ?? Atmosphere()
+        self.atmosphere = atmosphere
         self.windSpeed = windSpeed
         self.windAngle = windAngle
         self.weight = weight
-
-        self.vx = 0
-        self.vy = 0
-        self.x = 0
-        self.y = 0
-        self.n = 0
-        self.t = 0
+        self.scopeClickValue = scopeClickValue
     }
 
-    mutating func run() -> Ballistics {
-        let initialVelocityMPS = initialVelocity.converted(to: .metersPerSecond).value
+    // Main entry point to run the full simulation and get a trajectory table
+    func run() -> Ballistics {
+        let zeroAngle = Angle.zeroAngle(for: self)
+        let distances = solveTrajectory(launchAngle: zeroAngle)
+        return Ballistics(distances: distances)
+    }
 
-        // For the zero angle calculation, we can't use the full modern physics model
-        // as it would require a complex iterative solver. We will use the old method
-        // with a standard G1 BC for this part, as it's a close enough approximation
-        // to find the initial angle.
-        let approxG1BC = (dragModel == .g7) ? ballisticCoefficient * 1.9 : ballisticCoefficient
-        let environmentDragCoefficient = atmosphere.adjustCoefficient(dragCoefficient: approxG1BC)
+    // Solves for the drop at a specific range given a launch angle.
+    // Used by the zeroAngle solver.
+    func solveDropAtRange(launchAngle: Double, targetRange: Double) -> Double {
+        var vx = initialVelocity * cos(launchAngle)
+        var vy = initialVelocity * sin(launchAngle)
+        var x: Double = 0
+        var y: Double = -sightHeight
 
-        let zeroAngle = Angle.zeroAngle(
-            dragCoefficient: environmentDragCoefficient,
-            initialVelocity: self.initialVelocity,
-            sightHeight: self.sightHeight,
-            zeroRange: self.zeroRange,
-            yIntercept: 0
-        )
-
-        self.vx = initialVelocityMPS * cos(zeroAngle)
-        self.vy = initialVelocityMPS * sin(zeroAngle)
-        self.y = -sightHeight.converted(to: .meters).value
-
-        let headwind = headwindSpeed(windSpeed: windSpeed.converted(to: .metersPerSecond).value, windAngle: windAngle)
-        let crosswind = crosswindSpeed(windSpeed: windSpeed.converted(to: .metersPerSecond).value, windAngle: windAngle)
-
-        let shootingAngleRad = shootingAngle.converted(to: .radians).value
-        let gy = Constants.GRAVITY * cos(shootingAngleRad + zeroAngle)
-        let gx = Constants.GRAVITY * sin(shootingAngleRad + zeroAngle)
-
+        let headwind = windSpeed * cos(Math.degToRad(windAngle))
+        let gy = Constants.gravity * cos(shootingAngle + launchAngle)
+        let gx = Constants.gravity * sin(shootingAngle + launchAngle)
         let airDensity = atmosphere.airDensity()
 
-        while true {
+        while x < targetRange {
             let v = sqrt(vx * vx + vy * vy)
-            let v_air = v + headwind // Velocity relative to the air
+            if v == 0 { break }
+            let v_air = v + headwind
 
-            // Modern retardation calculation
             let cd = Drag.coefficient(for: self.dragModel, velocity: v_air, atmosphere: self.atmosphere)
             let retardation = (0.5 * airDensity * v_air * v_air * cd) / self.ballisticCoefficient
 
             let dvx = -(vx / v) * retardation
             let dvy = -(vy / v) * retardation
 
-            let dt = Constants.SIMULATION_TIME_STEP_FACTOR / v
+            let dt = Constants.timeStepFactor / v
 
             vx += dt * dvx + dt * gx
             vy += dt * dvy + dt * gy
 
+            x += dt * vx
+            y += dt * vy
+
+            if abs(vy) > abs(Constants.simulationStopSlope * vx) {
+                break
+            }
+        }
+        return y
+    }
+
+    // Solves the full trajectory and returns an array of Points
+    private func solveTrajectory(launchAngle: Double) -> [Point] {
+        var points: [Point] = []
+        var vx = initialVelocity * cos(launchAngle)
+        var vy = initialVelocity * sin(launchAngle)
+        var x: Double = 0
+        var y: Double = -sightHeight
+        var t: Double = 0
+        var windage: Double = 0
+        var n = 0
+
+        let headwind = windSpeed * cos(Math.degToRad(windAngle))
+        let crosswind = windSpeed * sin(Math.degToRad(windAngle))
+        let gy = Constants.gravity * cos(shootingAngle + launchAngle)
+        let gx = Constants.gravity * sin(shootingAngle + launchAngle)
+        let airDensity = atmosphere.airDensity()
+
+        while true {
+            let v = sqrt(vx * vx + vy * vy)
+            if v == 0 { break }
+            let v_air = v + headwind
+            let cd = Drag.coefficient(for: self.dragModel, velocity: v_air, atmosphere: self.atmosphere)
+            let retardation = (0.5 * airDensity * v_air * v_air * cd) / self.ballisticCoefficient
+
+            let dvx = -(vx / v) * retardation
+            let dvy = -(vy / v) * retardation
+
+            let dt = Constants.timeStepFactor / v
+
+            vx += dt * dvx + dt * gx
+            vy += dt * dvy + dt * gy
+            windage += crosswind * dt
+
             if x >= Double(n) {
-                addPoint(v: v, dt: dt, crosswind: crosswind, initialVelocityMPS: initialVelocityMPS)
+                let energy = 0.5 * weight * v * v
+
+                var dropClicks: Int? = nil
+                var windageClicks: Int? = nil
+
+                if let clickValue = self.scopeClickValue, clickValue > 0 {
+                    let dropMoa = -Math.radToMOA(atan(y / x))
+                    let windageMoa = Math.radToMOA(atan(windage / x))
+                    dropClicks = Int(round(dropMoa / clickValue))
+                    windageClicks = Int(round(windageMoa / clickValue))
+                }
+
+                let point = Point(
+                    range: x,
+                    drop: y,
+                    windage: windage,
+                    seconds: t,
+                    velocity: v,
+                    velocityX: vx,
+                    velocityY: vy,
+                    energy: energy,
+                    dropCorrectionClicks: dropClicks,
+                    windageCorrectionClicks: windageClicks
+                )
+                points.append(point)
+
                 n += 1
             }
 
             x += dt * vx
             y += dt * vy
 
-            if abs(vy) > abs(Constants.SIMULATION_STOP_SLOPE * vx) || n >= Constants.BALLISTICS_COMPUTATION_MAX_METERS {
+            if abs(vy) > abs(Constants.simulationStopSlope * vx) || x >= Constants.maxRange {
                 break
             }
 
             t += dt
         }
-        return ballistics
-    }
-
-    private mutating func addPoint(v: Double, dt: Double, crosswind: Double, initialVelocityMPS: Double) {
-        let moaDrop = -Math.radToMOA(atan(y / x))
-        let windageMeters = windage(windSpeed: crosswind, initialVelocity: initialVelocityMPS, x: x, t: t + dt)
-        let moaWindage = Math.radToMOA(atan(windageMeters / x))
-
-        let massInKg = weight.converted(to: .kilograms).value
-        let energyInJoules = 0.5 * massInKg * pow(v, 2)
-
-        let point = Point(
-            range: Measurement(value: x, unit: .meters),
-            drop: Measurement(value: y, unit: .meters),
-            dropCorrection: Measurement(value: moaDrop, unit: .minutesOfAngle),
-            windage: Measurement(value: windageMeters, unit: .meters),
-            windageCorrection: Measurement(value: moaWindage, unit: .minutesOfAngle),
-            seconds: t + dt,
-            velocity: Measurement(value: v, unit: .metersPerSecond),
-            velocityX: Measurement(value: vx, unit: .metersPerSecond),
-            velocityY: Measurement(value: vy, unit: .metersPerSecond),
-            energy: Measurement(value: energyInJoules, unit: .joules)
-        )
-        ballistics.distances.append(point)
-    }
-
-    private func headwindSpeed(windSpeed: Double, windAngle: Double) -> Double {
-        return windSpeed * cos(Math.degToRad(windAngle))
-    }
-
-    private func crosswindSpeed(windSpeed: Double, windAngle: Double) -> Double {
-        return windSpeed * sin(Math.degToRad(windAngle))
-    }
-
-    private func windage(windSpeed: Double, initialVelocity: Double, x: Double, t: Double) -> Double {
-        // windSpeed is in m/s. initialVelocity is in m/s. x is in meters. t is in seconds.
-        // The result should be in meters.
-        return windSpeed * (t - x / initialVelocity)
+        return points
     }
 }
