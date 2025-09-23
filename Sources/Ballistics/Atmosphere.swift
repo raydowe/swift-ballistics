@@ -56,6 +56,32 @@ public struct Atmosphere {
         return dragCoefficient * cd
     }
 
+    /**
+     Calculates the speed of sound for the given atmospheric conditions.
+     - Returns: The speed of sound in meters per second.
+    */
+    public func speedOfSound() -> Double {
+        let tempCelsius = temperature.converted(to: .celsius).value
+        // This formula is derived from the libballistics C code, which works in ft/s.
+        // The constant 49.0223 is likely related to properties of air (gamma, R).
+        // The result is converted from ft/s to m/s.
+        let speedOfSoundFPS = sqrt(tempCelsius + 273.15) * 49.0223
+        return speedOfSoundFPS * 0.3048
+    }
+
+    /**
+     Calculates the air density for the given atmospheric conditions.
+     - Returns: The air density in kg/m^3.
+    */
+    public func airDensity() -> Double {
+        let p = self.pressure.converted(to: .newtonsPerMetersSquared).value
+        let t = self.temperature.converted(to: .kelvin).value
+        // Ignoring humidity for now for simplicity.
+        // Formula for dry air: rho = P / (R_specific * T)
+        // R_specific for dry air is approx. 287.058 J/(kg·K)
+        return p / (287.058 * t)
+    }
+
     // Drag coefficient atmospheric corrections
     private func calcFR(temperature: Double, pressure: Double, relativeHumidity: Double) -> Double {
         let VPw = 4e-6 * pow(temperature, 3) - 0.0004 * pow(temperature, 2) + 0.0234 * temperature - 0.2517
