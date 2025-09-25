@@ -25,14 +25,14 @@ To calculate ballistic data:
 ```swift
 // Generate a full ballistic solution
 let solution = Ballistics.solve(
-  dragCoefficient: 0.414, // The G1 drag coefficient of the projectile
+  dragModel: .G1, // The drag model for the projectile (G1, G7, etc.)
+  ballisticCoefficient: 0.414, // The ballistic coefficient of the projectile
   initialVelocity: Measurement(value: 1005.84, unit: .metersPerSecond), // The initial velocity of the projectile
   sightHeight: Measurement(value: 3.81, unit: .centimeters), // The distance the sight is offset from the bore
   shootingAngle: Measurement(value: 0, unit: .degrees), // The angle up (+) or down (-) of the shot
   zeroRange: Measurement(value: 91.44, unit: .meters), // The distance the projectile is zeroed at
   atmosphere: Atmosphere(
     altitude: Measurement(value: 3048, unit: .meters), // The altitude above sea level
-    pressure: Measurement(value: 101925, unit: .newtonsPerMetersSquared), // The current air pressure
     temperature: Measurement(value: -15, unit: .celsius), // The current temperature
     relativeHumidity: 0.9 // The relative humidity percent between 0 and 1
   ),
