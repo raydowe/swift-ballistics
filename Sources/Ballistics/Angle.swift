@@ -36,6 +36,11 @@ struct Angle {
             }
 
             let nextAngle = angle1 - f1 * (angle1 - angle0) / (f1 - f0)
+
+            if abs(nextAngle - angle1) < 1e-6 { // If the angle isn't changing much, we're done
+                return nextAngle
+            }
+
             angle0 = angle1
             f0 = f1
 
