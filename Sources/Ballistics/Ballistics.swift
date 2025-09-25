@@ -101,7 +101,7 @@ internal struct Simulation {
 
     // Solves for the drop at a specific range given a launch angle.
     // Used by the zeroAngle solver.
-    func solveDropAtRange(launchAngle: Double, targetRange: Double) -> Double {
+    internal func solveDropAtRange(launchAngle: Double, targetRange: Double) -> Double {
         var vx = initialVelocity * cos(launchAngle)
         var vy = initialVelocity * sin(launchAngle)
         var x: Double = 0
@@ -113,20 +113,11 @@ internal struct Simulation {
         let airDensity = atmosphere.airDensity()
 
         while x < targetRange {
-            let v = sqrt(vx * vx + vy * vy)
-            if v == 0 { break }
-            let v_air = v + headwind
+            let (dt, newVx, newVy) = step(vx: vx, vy: vy, headwind: headwind, gx: gx, gy: gy, airDensity: airDensity)
+            guard dt > 0 else { break }
 
-            let cd = Drag.coefficient(for: self.dragModel, velocity: v_air, atmosphere: self.atmosphere)
-            let retardation = (0.5 * airDensity * v_air * v_air * cd) / self.ballisticCoefficient
-
-            let dvx = -(vx / v) * retardation
-            let dvy = -(vy / v) * retardation
-
-            let dt = Constants.timeStepFactor / v
-
-            vx += dt * dvx + dt * gx
-            vy += dt * dvy + dt * gy
+            vx = newVx
+            vy = newVy
 
             x += dt * vx
             y += dt * vy
@@ -158,18 +149,6 @@ internal struct Simulation {
         while true {
             let v = sqrt(vx * vx + vy * vy)
             if v == 0 { break }
-            let v_air = v + headwind
-            let cd = Drag.coefficient(for: self.dragModel, velocity: v_air, atmosphere: self.atmosphere)
-            let retardation = (0.5 * airDensity * v_air * v_air * cd) / self.ballisticCoefficient
-
-            let dvx = -(vx / v) * retardation
-            let dvy = -(vy / v) * retardation
-
-            let dt = Constants.timeStepFactor / v
-
-            vx += dt * dvx + dt * gx
-            vy += dt * dvy + dt * gy
-            windage += crosswind * dt
 
             if x >= Double(n) {
                 let energy = 0.5 * weight * v * v
@@ -201,15 +180,41 @@ internal struct Simulation {
                 n += 1
             }
 
+            let (dt, newVx, newVy) = step(vx: vx, vy: vy, headwind: headwind, gx: gx, gy: gy, airDensity: airDensity)
+            guard dt > 0 else { break }
+
+            vx = newVx
+            vy = newVy
+
             x += dt * vx
             y += dt * vy
+            windage += crosswind * dt
+            t += dt
 
             if abs(vy) > abs(Constants.simulationStopSlope * vx) || x >= Constants.maxRange {
                 break
             }
-
-            t += dt
         }
         return points
+    }
+
+    // A single step in the simulation, returns the time delta and new velocities
+    private func step(vx: Double, vy: Double, headwind: Double, gx: Double, gy: Double, airDensity: Double) -> (dt: Double, newVx: Double, newVy: Double) {
+        let v = sqrt(vx * vx + vy * vy)
+        guard v > 0 else { return (0, vx, vy) }
+
+        let v_air = v + headwind
+        let cd = Drag.coefficient(for: self.dragModel, velocity: v_air, atmosphere: self.atmosphere)
+        let retardation = (0.5 * airDensity * v_air * v_air * cd) / self.ballisticCoefficient
+
+        let dvx = -(vx / v) * retardation
+        let dvy = -(vy / v) * retardation
+
+        let dt = Constants.timeStepFactor / v
+
+        let newVx = vx + dt * dvx + dt * gx
+        let newVy = vy + dt * dvy + dt * gy
+
+        return (dt, newVx, newVy)
     }
 }
