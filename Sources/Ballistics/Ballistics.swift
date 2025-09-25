@@ -11,7 +11,7 @@ public struct Ballistics {
 
     public var distances: [Point] = []
     
-    private init(distances: [Point]) {
+    internal init(distances: [Point]) {
         self.distances = distances
     }
 
