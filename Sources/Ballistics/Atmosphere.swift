@@ -8,16 +8,18 @@
 import Foundation
 
 public struct Atmosphere {
-
+    let altitude: Measurement<UnitLength>
     let pressure: Measurement<UnitPressure>
     let temperature: Measurement<UnitTemperature>
     let relativeHumidity: Double
 
     public init(
-        pressure: Measurement<UnitPressure> = Measurement<UnitPressure>(value: 101325, unit: .newtonsPerMetersSquared),
-        temperature: Measurement<UnitTemperature> = Measurement<UnitTemperature>(value: 15, unit: .celsius),
+        altitude: Measurement<UnitLength> = Measurement<UnitLength>(value: 0, unit: .meters),
+        pressure: Measurement<UnitPressure> = Measurement<UnitPressure>(value: 1000, unit: .newtonsPerMetersSquared),
+        temperature: Measurement<UnitTemperature> = Measurement<UnitTemperature>(value: 10, unit: .celsius),
         relativeHumidity: Double = 0
     ) {
+        self.altitude = altitude
         self.pressure = pressure
         self.temperature = temperature
         self.relativeHumidity = relativeHumidity
