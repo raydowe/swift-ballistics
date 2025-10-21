@@ -25,6 +25,7 @@ To calculate ballistic data:
 ```swift
 // Generate a full ballistic solution
 let solution = Ballistics.solve(
+  preferredDistanceUnit: .meters, // The preferred distance units used for sampling
   dragCoefficient: 0.414, // The G1 drag coefficient of the projectile
   initialVelocity: Measurement(value: 3300, unit: .feetPerSecond), // The initial velocity of the projectile
   sightHeight: Measurement(value: 1.8, unit: .inches), // The distance the sight is offset from the bore
