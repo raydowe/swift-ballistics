@@ -84,6 +84,13 @@ import Numerics
     #expect(point3.windageCorrection.converted(to: .minutesOfAngle).value.isApproximatelyEqual(to: 0, absoluteTolerance: 0.01))
     #expect(point4.windageCorrection.converted(to: .minutesOfAngle).value.isApproximatelyEqual(to: 0, absoluteTolerance: 0.01))
     #expect(point5.windageCorrection.converted(to: .minutesOfAngle).value.isApproximatelyEqual(to: 0, absoluteTolerance: 0.01))
+    
+    #expect(point0.travelTime.converted(to: .milliseconds).value.isApproximatelyEqual(to: 0.2, absoluteTolerance: 0.1))
+    #expect(point1.travelTime.converted(to: .milliseconds).value.isApproximatelyEqual(to: 94.8, absoluteTolerance: 0.1))
+    #expect(point2.travelTime.converted(to: .milliseconds).value.isApproximatelyEqual(to: 197.0, absoluteTolerance: 0.1))
+    #expect(point3.travelTime.converted(to: .milliseconds).value.isApproximatelyEqual(to: 307.5, absoluteTolerance: 0.1))
+    #expect(point4.travelTime.converted(to: .milliseconds).value.isApproximatelyEqual(to: 427.7, absoluteTolerance: 0.1))
+    #expect(point5.travelTime.converted(to: .milliseconds).value.isApproximatelyEqual(to: 558.5, absoluteTolerance: 0.1))
 }
 
 @Test func solutionWithAtmosphere() async throws {
@@ -166,4 +173,11 @@ import Numerics
     #expect(point3.windageCorrection.converted(to: .minutesOfAngle).value.isApproximatelyEqual(to: 2.07, absoluteTolerance: 0.01))
     #expect(point4.windageCorrection.converted(to: .minutesOfAngle).value.isApproximatelyEqual(to: 2.82, absoluteTolerance: 0.01))
     #expect(point5.windageCorrection.converted(to: .minutesOfAngle).value.isApproximatelyEqual(to: 3.62, absoluteTolerance: 0.01))
+    
+    #expect(point0.travelTime.converted(to: .milliseconds).value.isApproximatelyEqual(to: 0.2, absoluteTolerance: 0.1))
+    #expect(point1.travelTime.converted(to: .milliseconds).value.isApproximatelyEqual(to: 94.0, absoluteTolerance: 0.1))
+    #expect(point2.travelTime.converted(to: .milliseconds).value.isApproximatelyEqual(to: 193.4, absoluteTolerance: 0.1))
+    #expect(point3.travelTime.converted(to: .milliseconds).value.isApproximatelyEqual(to: 298.9, absoluteTolerance: 0.1))
+    #expect(point4.travelTime.converted(to: .milliseconds).value.isApproximatelyEqual(to: 411.3, absoluteTolerance: 0.1))
+    #expect(point5.travelTime.converted(to: .milliseconds).value.isApproximatelyEqual(to: 530.9, absoluteTolerance: 0.1))
 }

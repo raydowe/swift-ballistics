@@ -82,13 +82,15 @@ public struct Ballistics {
                 let windageInches = windage(windSpeed: crosswind, initialVelocity: initialVelocityFPS, x: x, t: t + dt)
                 let moaWindage = Math.radToMOA(atan((windageInches / 12) / x))
                 let ftlbs = weight.converted(to: .grains).value * (pow(v, 2)) / (2 * 32.163 * 7000)
+                let elapsed = t + dt
                 let point = Point(
                     range: Measurement(value: x / 3, unit: .yards),
                     drop: Measurement(value: pathInches, unit: .inches),
                     dropCorrection: Measurement(value: moaDrop, unit: .minutesOfAngle),
                     windage: Measurement(value: windageInches, unit: .inches),
                     windageCorrection: Measurement(value: moaWindage, unit: .minutesOfAngle),
-                    seconds: t + dt,
+                    seconds: elapsed,
+                    travelTime: Measurement(value: elapsed, unit: .seconds),
                     velocity: Measurement(value: v, unit: .feetPerSecond),
                     velocityX: Measurement(value: vx, unit: .feetPerSecond),
                     velocityY: Measurement(value: vy, unit: .feetPerSecond),
@@ -130,3 +132,4 @@ public struct Ballistics {
         return vw * (t - x / initialVelocity)
     }
 }
+

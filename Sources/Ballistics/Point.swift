@@ -14,8 +14,10 @@ public struct Point: Equatable, Hashable {
     public let windage: Measurement<UnitLength>
     public let windageCorrection: Measurement<UnitAngle>
     public let seconds: Double
+    public let travelTime: Measurement<UnitDuration>
     public let velocity: Measurement<UnitSpeed>
     public let velocityX: Measurement<UnitSpeed>
     public let velocityY: Measurement<UnitSpeed>
     public let energy: Measurement<UnitEnergy>
 }
+

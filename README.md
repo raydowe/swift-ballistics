@@ -51,6 +51,7 @@ print("Windage MOA: \(point.windageCorrection)")
 print("Travel time: \(point.seconds)")
 print("Velocity: \(point.velocity)")
 print("Energy: \(point.energy)")
+print("Travel Time: \(point.travelTime)")
 
 // Exact range: 200.14678896533894 yd
 // Drop: -1.8193914534841453 in
@@ -60,5 +61,6 @@ print("Energy: \(point.energy)")
 // Travel time: 0.19335116796850343
 // Velocity: 2929.55627989206 f/s
 // Energy: 2287.180033060617 ft⋅lbf
+// Travel Time: 197.0 ms
 
 ```
