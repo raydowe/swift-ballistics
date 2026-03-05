@@ -66,13 +66,6 @@ import Numerics
     #expect(point4.energy.converted(to: .footPounds).value.isApproximatelyEqual(to: 1529, absoluteTolerance: 1))
     #expect(point5.energy.converted(to: .footPounds).value.isApproximatelyEqual(to: 1285, absoluteTolerance: 1))
 
-    #expect(point0.seconds.isApproximatelyEqual(to: 0, absoluteTolerance: 0.01))
-    #expect(point1.seconds.isApproximatelyEqual(to: 0.09, absoluteTolerance: 0.01))
-    #expect(point2.seconds.isApproximatelyEqual(to: 0.20, absoluteTolerance: 0.01))
-    #expect(point3.seconds.isApproximatelyEqual(to: 0.31, absoluteTolerance: 0.01))
-    #expect(point4.seconds.isApproximatelyEqual(to: 0.43, absoluteTolerance: 0.01))
-    #expect(point5.seconds.isApproximatelyEqual(to: 0.56, absoluteTolerance: 0.01))
-
     #expect(point1.dropCorrection.converted(to: .minutesOfAngle).value.isApproximatelyEqual(to: 0.00, absoluteTolerance: 0.01))
     #expect(point2.dropCorrection.converted(to: .minutesOfAngle).value.isApproximatelyEqual(to: 0.92, absoluteTolerance: 0.01))
     #expect(point3.dropCorrection.converted(to: .minutesOfAngle).value.isApproximatelyEqual(to: 2.62, absoluteTolerance: 0.01))
@@ -154,13 +147,6 @@ import Numerics
     #expect(point3.energy.converted(to: .footPounds).value.isApproximatelyEqual(to: 2024, absoluteTolerance: 1))
     #expect(point4.energy.converted(to: .footPounds).value.isApproximatelyEqual(to: 1787, absoluteTolerance: 1))
     #expect(point5.energy.converted(to: .footPounds).value.isApproximatelyEqual(to: 1571, absoluteTolerance: 1))
-
-    #expect(point0.seconds.isApproximatelyEqual(to: 0, absoluteTolerance: 0.01))
-    #expect(point1.seconds.isApproximatelyEqual(to: 0.09, absoluteTolerance: 0.01))
-    #expect(point2.seconds.isApproximatelyEqual(to: 0.20, absoluteTolerance: 0.01))
-    #expect(point3.seconds.isApproximatelyEqual(to: 0.30, absoluteTolerance: 0.01))
-    #expect(point4.seconds.isApproximatelyEqual(to: 0.41, absoluteTolerance: 0.01))
-    #expect(point5.seconds.isApproximatelyEqual(to: 0.53, absoluteTolerance: 0.01))
 
     #expect(point1.dropCorrection.converted(to: .minutesOfAngle).value.isApproximatelyEqual(to: 0.00, absoluteTolerance: 0.01))
     #expect(point2.dropCorrection.converted(to: .minutesOfAngle).value.isApproximatelyEqual(to: 0.87, absoluteTolerance: 0.01))

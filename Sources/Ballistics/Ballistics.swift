@@ -118,7 +118,6 @@ public struct Ballistics {
                 dropCorrection: Measurement(value: moaDrop, unit: .minutesOfAngle),
                 windage: Measurement(value: windageInches, unit: .inches),
                 windageCorrection: Measurement(value: moaWindage, unit: .minutesOfAngle),
-                seconds: elapsed,
                 travelTime: Measurement(value: elapsed, unit: .seconds),
                 velocity: Measurement(value: currentV, unit: .feetPerSecond),
                 velocityX: Measurement(value: vx, unit: .feetPerSecond),
