@@ -29,54 +29,54 @@ public struct Atmosphere {
     /**
      Adjusts the ballistic drag coefficient based on atmospheric conditions.
 
-     This method calculates a corrected drag coefficient by accounting for changes in altitude, barometric pressure, temperature, and relative humidity. These factors influence air density and, consequently, the drag force acting on a projectile.
+     Returns the coefficient that gives the same drag in Army Standard Metro air (59 °F,
+     29.53 inHg, 78% relative humidity, the conditions assumed when no atmosphere is given)
+     as `dragCoefficient` gives in these conditions, using air density from the ideal gas law
+     including water vapour. The solver uses density directly; this is provided for callers
+     that want the equivalent coefficient.
 
-     - Parameters:
-       - dragCoefficient: The G1 base drag coefficient of the projectile, typically measured under standard atmospheric conditions.
-       - altitude: The altitude above sea level in feet (ft).
-       - barometer: The barometric pressure in inches of mercury (in Hg)
-       - temperature: The ambient temperature in degrees Farenheit (°F).
-       - relativeHumidity: The relative humidity as a percentage (0 to 1).
+     `pressure` is treated as barometric pressure corrected to sea level (as given in weather
+     reports); it is converted to station pressure using `altitude`.
 
-     - Returns:
-       A `Double` representing the adjusted drag coefficient for the given atmospheric conditions.
+     - Parameter dragCoefficient: The base drag coefficient (G1 or G7) of the projectile.
+     - Returns: The drag coefficient adjusted for the air density of these conditions.
      */
-
     public func adjustCoefficient(
         dragCoefficient: Double
     ) -> Double {
+        dragCoefficient * Atmosphere.referenceDensity / density
+    }
+
+    /// Air density for these conditions, lb/ft³.
+    var density: Double {
+        Atmosphere.density(
+            stationPressureInHg: stationPressureInHg,
+            temperatureFahrenheit: temperature.converted(to: .fahrenheit).value,
+            relativeHumidity: relativeHumidity
+        )
+    }
+
+    /// Local speed of sound, ft/s (49.0223 · √°R).
+    var speedOfSound: Double {
+        49.0223 * sqrt(temperature.converted(to: .fahrenheit).value + 459.67)
+    }
+
+    /// Station (unadjusted) pressure at `altitude`, from the sea-level-corrected `pressure`.
+    private var stationPressureInHg: Double {
         let altitudeFeet = altitude.converted(to: .feet).value
-        let temperatureFahrenheit = temperature.converted(to: .fahrenheit).value
-        let pressureInHg = pressure.converted(to: .inchesOfMercury).value
-        let fa = calcFA(altitude: altitudeFeet)
-        let ft = calcFT(temperature: temperatureFahrenheit, altitude: altitudeFeet)
-        let fr = calcFR(temperature: temperatureFahrenheit, pressure: pressureInHg, relativeHumidity: relativeHumidity)
-        let fp = calcFP(pressure: pressureInHg)
-        let cd = fa * (1 + ft - fp) * fr
-        return dragCoefficient * cd
+        return pressure.converted(to: .inchesOfMercury).value * pow(1 - 6.8753e-6 * altitudeFeet, 5.2559)
     }
 
-    // Drag coefficient atmospheric corrections
-    private func calcFR(temperature: Double, pressure: Double, relativeHumidity: Double) -> Double {
-        let VPw = 4e-6 * pow(temperature, 3) - 0.0004 * pow(temperature, 2) + 0.0234 * temperature - 0.2517
-        let frh = 0.995 * (pressure / (pressure - (0.3783 * relativeHumidity * VPw)))
-        return frh
+    /// Air density in lb/ft³, from station pressure, temperature and humidity.
+    static func density(stationPressureInHg: Double, temperatureFahrenheit: Double, relativeHumidity: Double) -> Double {
+        let celsius = (temperatureFahrenheit - 32) * 5 / 9
+        // Saturation vapour pressure (Arden Buck equation), hPa → inHg.
+        let saturation = 6.1121 * exp((18.678 - celsius / 234.5) * (celsius / (257.14 + celsius))) / 33.8639
+        let vapour = relativeHumidity * saturation
+        // Ideal gas: ρ = P / (R·T); water vapour displaces denser dry air (1 − 0.622 ≈ 0.378).
+        return 1.32562 * (stationPressureInHg - 0.3783 * vapour) / (temperatureFahrenheit + 459.67)
     }
 
-    private func calcFP(pressure: Double) -> Double {
-        let pStd = 29.921 // Standard pressure at sea level in inHg
-        let fp = (pressure - pStd) / pStd
-        return fp
-    }
-
-    private func calcFT(temperature: Double, altitude: Double) -> Double {
-        let tStd = -0.0036 * altitude + 59
-        let ft = (temperature - tStd) / (459.6 + tStd)
-        return ft
-    }
-
-    private func calcFA(altitude: Double) -> Double {
-        let fa = -4e-15 * pow(altitude, 3) + 4e-10 * pow(altitude, 2) - 3e-5 * altitude + 1
-        return 1 / fa
-    }
+    /// Army Standard Metro air density (≈ 0.0751 lb/ft³), assumed when no atmosphere is given.
+    static let referenceDensity = density(stationPressureInHg: 29.53, temperatureFahrenheit: 59, relativeHumidity: 0.78)
 }

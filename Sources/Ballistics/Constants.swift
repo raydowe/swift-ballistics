@@ -10,5 +10,5 @@ import Foundation
 struct Constants {
 
     static let BALLISTICS_COMPUTATION_MAX_YARDS = 50000
-    static let GRAVITY = -32.194
+    static let GRAVITY = -32.17405 // Standard gravity, ft/s²
 }

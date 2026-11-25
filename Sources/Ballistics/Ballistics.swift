@@ -33,7 +33,8 @@ public struct Ballistics {
 
      - Parameters:
        - preferredDistanceUnit: The preferred distance unit, used for sampling
-       - dragCoefficient: The G1 drag coefficient of the projectile, a dimensionless number representing aerodynamic resistance.
+       - dragCoefficient: The ballistic coefficient of the projectile, expressed against `dragModel`.
+       - dragModel: The reference drag model the coefficient was measured against (`.g1` or `.g7`). Default is `.g1`.
        - initialVelocity: The muzzle velocity of the projectile in meters per second (ft/s).
        - sightHeight: The height of the sight above the bore axis in inches (in).
        - shootingAngle: The actual angle of elevation at which the projectile is fired, in degrees. Positive is up, negative is down.
@@ -43,7 +44,7 @@ public struct Ballistics {
        - windAngle: The direction of the wind relative to the projectile's path, in degrees (0° = headwind, 90° = left to right).
        - weight: The projectile weight.
        - preferredDistanceUnit: The unit in which you want sampling to occur (e.g., .yards or .meters). Default is .yards.
-       - distanceStep: The sampling step in the preferred unit. Default is 1 yard.
+       - distanceStep: The sampling step. Default is 1 of `preferredDistanceUnit` (1 yd, or 1 m when sampling in meters).
 
      - Returns:
        A ballistics object, which contains a set of trajectory points sampled at fixed distance steps
@@ -52,6 +53,7 @@ public struct Ballistics {
     public static func solve(
         preferredDistanceUnit: UnitLength = .yards,
         dragCoefficient: Double,
+        dragModel: DragModel = .g1,
         initialVelocity: Measurement<UnitSpeed>,
         sightHeight: Measurement<UnitLength>,
         shootingAngle: Measurement<UnitAngle>,
@@ -60,9 +62,10 @@ public struct Ballistics {
         windSpeed: Measurement<UnitSpeed>,
         windAngle: Double,
         weight: Measurement<UnitMass> = Measurement<UnitMass>(value: 0, unit: .grains),
-        distanceStep: Measurement<UnitLength> = Measurement(value: 1, unit: .yards)
+        distanceStep: Measurement<UnitLength>? = nil
     ) -> Ballistics {
-        
+
+        let distanceStep = distanceStep ?? Measurement(value: 1, unit: preferredDistanceUnit)
         var ballistics = Ballistics(
             preferredDistanceUnit: preferredDistanceUnit,
             distanceStep: distanceStep
@@ -71,44 +74,50 @@ public struct Ballistics {
         // Normalize step to feet for threshold checks; keep a clean preferred-unit step for labeling.
         let stepInPreferred = distanceStep.converted(to: preferredDistanceUnit)
         let stepFeet = stepInPreferred.converted(to: .feet).value
-        let unitSymbol = preferredDistanceUnit.symbol
 
-        // Compute a maximum range in feet based on existing yard-based constant for compatibility.
-        // If preferred unit is meters, convert the same max-yards distance to feet.
-        let maxFeetFromYards = Double(Constants.BALLISTICS_COMPUTATION_MAX_YARDS) * 3.0
-        let maxFeet = maxFeetFromYards
+        let maxFeet = Double(Constants.BALLISTICS_COMPUTATION_MAX_YARDS) * 3.0
 
-        let environmentDragCoefficient = atmosphere?.adjustCoefficient(dragCoefficient: dragCoefficient) ?? dragCoefficient
+        let airDensity = atmosphere?.density ?? Atmosphere.referenceDensity
+        let speedOfSound = atmosphere?.speedOfSound ?? Drag.standardSpeedOfSound
         let initialVelocityFPS = initialVelocity.converted(to: .feetPerSecond).value
         let zeroAngle = Angle.zeroAngle(
-            dragCoefficient: environmentDragCoefficient,
+            dragModel: dragModel,
+            dragCoefficient: dragCoefficient,
+            airDensity: airDensity,
+            speedOfSound: speedOfSound,
             initialVelocity: initialVelocity,
             sightHeight: sightHeight,
             zeroRange: zeroRange,
             yIntercept: 0
         )
-        let headwind = headwindSpeed(windSpeed: windSpeed.converted(to: .milesPerHour).value, windAngle: windAngle)
-        let crosswind = crosswindSpeed(windSpeed: windSpeed.converted(to: .milesPerHour).value, windAngle: windAngle)
-        let gy = Constants.GRAVITY * cos(Math.degToRad(shootingAngle.converted(to: .degrees).value + zeroAngle))
-        let gx = Constants.GRAVITY * sin(Math.degToRad(shootingAngle.converted(to: .degrees).value + zeroAngle))
+        let headwind = headwindSpeed(windSpeed: windSpeed.converted(to: .feetPerSecond).value, windAngle: windAngle)
+        let crosswind = crosswindSpeed(windSpeed: windSpeed.converted(to: .feetPerSecond).value, windAngle: windAngle)
 
-        var vx = initialVelocityFPS * cos(Math.degToRad(zeroAngle))
-        var vy = initialVelocityFPS * sin(Math.degToRad(zeroAngle))
-        var x: Double = 0 // feet
-        var y: Double = -sightHeight.converted(to: .inches).value / 12 // feet (inches / 12)
-        var t: Double = 0
-
-        // Sampling index and next threshold in feet
+        let trajectory = Trajectory(
+            dragModel: dragModel,
+            dragCoefficient: dragCoefficient,
+            airDensity: airDensity,
+            speedOfSound: speedOfSound,
+            headwindFPS: headwind,
+            crosswindFPS: crosswind,
+            shootingAngleDegrees: shootingAngle.converted(to: .degrees).value
+        )
+        var state = Trajectory.State(
+            y: -sightHeight.converted(to: .feet).value,
+            vx: initialVelocityFPS * cos(Math.degToRad(zeroAngle)),
+            vy: initialVelocityFPS * sin(Math.degToRad(zeroAngle))
+        )
         var sampleIndex = 0
-        var nextSampleFeet = Double(sampleIndex) * stepFeet
 
-        // Emit initial point at 0 distance
-        func emitPoint(currentV: Double, elapsed: Double, vx: Double, vy: Double, xFeet: Double, yFeet: Double) {
+        func emitPoint(_ s: Trajectory.State) {
+            let xFeet = s.x
+            let yFeet = s.y
+            let currentV = s.speed
             let pathInches = yFeet * 12
-            let moaDrop = -Math.radToMOA(atan(yFeet / max(xFeet, 1e-9)))
-            let windageInches = Ballistics.windage(windSpeed: crosswind, initialVelocity: initialVelocityFPS, x: xFeet, t: elapsed)
-            let moaWindage = Math.radToMOA(atan((windageInches / 12) / max(xFeet, 1e-9)))
-            let ftlbs = weight.converted(to: .grains).value * (pow(currentV, 2)) / (2 * 32.163 * 7000)
+            let moaDrop = xFeet > 0 ? -Math.radToMOA(atan(yFeet / xFeet)) : 0
+            let windageInches = s.z * 12
+            let moaWindage = xFeet > 0 ? Math.radToMOA(atan(s.z / xFeet)) : 0
+            let ftlbs = weight.converted(to: .grains).value * (pow(currentV, 2)) / (2 * -Constants.GRAVITY * 7000)
 
             // Range labeling in preferred unit aligned to exact sample index
             let rangeValue = Double(sampleIndex) * stepInPreferred.value
@@ -118,73 +127,49 @@ public struct Ballistics {
                 dropCorrection: Measurement(value: moaDrop, unit: .minutesOfAngle),
                 windage: Measurement(value: windageInches, unit: .inches),
                 windageCorrection: Measurement(value: moaWindage, unit: .minutesOfAngle),
-                travelTime: Measurement(value: elapsed, unit: .seconds),
+                travelTime: Measurement(value: s.t, unit: .seconds),
                 velocity: Measurement(value: currentV, unit: .feetPerSecond),
-                velocityX: Measurement(value: vx, unit: .feetPerSecond),
-                velocityY: Measurement(value: vy, unit: .feetPerSecond),
+                velocityX: Measurement(value: s.vx, unit: .feetPerSecond),
+                velocityY: Measurement(value: s.vy, unit: .feetPerSecond),
                 energy: Measurement(value: ftlbs, unit: .footPounds)
             )
             ballistics.distances.append(point)
         }
 
-        // Ensure first sample at 0 distance
-        emitPoint(currentV: sqrt(vx * vx + vy * vy), elapsed: t, vx: vx, vy: vy, xFeet: x, yFeet: y)
-        sampleIndex += 1
-        nextSampleFeet = Double(sampleIndex) * stepFeet
-
+        // Land exactly on every sample distance, starting at the muzzle.
+        emitPoint(state)
         while true {
-            let v = sqrt(vx * vx + vy * vy)
-            let dv = Drag.retard(dragCoefficient: environmentDragCoefficient, projectileVelocity: v + headwind)
-            let dvx = -(vx / max(v, 1e-9)) * dv
-            let dvy = -(vy / max(v, 1e-9)) * dv
-
-            let dt = 0.5 / max(v, 1e-9)
-            let vxNext = vx + dt * dvx + dt * gx
-            let vyNext = vy + dt * dvy + dt * gy
-
-            let xNext = x + dt * (vx + vxNext) / 2
-            let yNext = y + dt * (vy + vyNext) / 2
-
-            // Check if we crossed the next sample threshold (in feet)
-            if x < nextSampleFeet && xNext >= nextSampleFeet {
-                // Linear interpolation to the exact sample position for reporting
-                let alpha = (nextSampleFeet - x) / max(xNext - x, 1e-12)
-                let vxInterp = vx + alpha * (vxNext - vx)
-                let vyInterp = vy + alpha * (vyNext - vy)
-                let vInterp = sqrt(vxInterp * vxInterp + vyInterp * vyInterp)
-                let yInterp = y + alpha * (yNext - y)
-                let tInterp = t + alpha * dt
-
-                emitPoint(currentV: vInterp, elapsed: tInterp, vx: vxInterp, vy: vyInterp, xFeet: nextSampleFeet, yFeet: yInterp)
-
-                sampleIndex += 1
-                nextSampleFeet = Double(sampleIndex) * stepFeet
-            }
-
-            // Advance state
-            x = xNext
-            y = yNext
-            vx = vxNext
-            vy = vyNext
-            t += dt
-
-            // Termination conditions
-            if abs(vy) > abs(3 * vx) { break }              // trajectory too steep
-            if x >= maxFeet { break }                        // exceeded max range
+            sampleIndex += 1
+            let target = Double(sampleIndex) * stepFeet
+            guard target <= maxFeet, let next = trajectory.advance(state, to: target) else { break }
+            state = next
+            emitPoint(state)
         }
 
         return ballistics
     }
 
+    /**
+     Returns the trajectory point at the given distance.
+
+     Points are calculated exactly at each multiple of `distanceStep`, in `preferredDistanceUnit`.
+     The requested distance may be in any unit, but it must land on that grid; otherwise `nil`
+     is returned rather than a point at a nearby distance. To query metric distances, solve with
+     a metric `preferredDistanceUnit`.
+
+     - Parameter distance: The distance to look up.
+     - Returns: The point at exactly that distance, or `nil` if it is off the sampling grid or out of range.
+     */
     public func getPoint(at distance: Measurement<UnitLength>) -> Point? {
-        // Convert requested distance to preferred unit and compute the sample index
-        let requestedInPreferred = distance.converted(to: preferredDistanceUnit).value
         let stepValue = distanceStep.value
         guard stepValue > 0 else { return nil }
 
-        let index = Int((requestedInPreferred / stepValue).rounded())
-        guard index >= 0 && index < distances.count else { return nil }
-        return distances[index]
+        let steps = distance.converted(to: preferredDistanceUnit).value / stepValue
+        let index = steps.rounded()
+        // Allow only for floating-point noise from unit conversion, never a different distance.
+        guard abs(steps - index) <= 1e-9 * max(1, abs(steps)) else { return nil }
+        guard index >= 0, index < Double(distances.count) else { return nil }
+        return distances[Int(index)]
     }
 
     private static func headwindSpeed(windSpeed: Double, windAngle: Double) -> Double {
@@ -193,10 +178,5 @@ public struct Ballistics {
 
     private static func crosswindSpeed(windSpeed: Double, windAngle: Double) -> Double {
         return windSpeed * sin(Math.degToRad(windAngle))
-    }
-
-    private static func windage(windSpeed: Double, initialVelocity: Double, x: Double, t: Double) -> Double {
-        let vw = windSpeed * 17.60 // Convert to inches per second
-        return vw * (t - x / max(initialVelocity, 1e-9))
     }
 }
